@@ -1,0 +1,14 @@
+[project]
+name = 'FLIMSY - Felsen Lab Intregated Modular System for analYsis'
+version = '0.0.0'
+authors = [
+{name='Nicholas Garcia', email='98439831+n-garc@users.noreply.github.com'}
+]
+description = 'Collection of analysis modules for processing electrophysiology, imaging, behavior, and other systems neuroscience data.'
+readme = 'README.md'
+require-python = '3.9'
+
+[project.urls]
+Homepage = 'https://github.com/felsenlab/flimsy'
+Issues = 'https://github.com/felsenlab/flimsy/issues'
+
