@@ -1,0 +1,11 @@
+modules:
+  - load_raw
+  - normalize
+  - detect_spikes
+  - save_results
+
+defaults:
+  normalize:
+    method: zscore
+  detect_spikes:
+    threshold: 4.0

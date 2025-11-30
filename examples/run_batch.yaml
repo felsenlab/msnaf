@@ -1,0 +1,11 @@
+load_raw:
+  filename:
+    - "data/sub01.h5"
+    - "data/sub02.h5"
+    - "data/sub03.h5"
+
+detect_spikes:
+  threshold:
+    - 4.0
+    - 4.0
+    - 4.0
