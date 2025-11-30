@@ -12,3 +12,5 @@ readme = 'README.md'
 Homepage = 'https://github.com/felsenlab/flimsy'
 Issues = 'https://github.com/felsenlab/flimsy/issues'
 
+[project.scripts]
+flimsy = "flimsy.cli:main"
