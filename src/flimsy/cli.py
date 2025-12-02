@@ -1,9 +1,12 @@
 import os
+from time import time
 import logging
 import argparse
 from pathlib import Path
 
 from flimsy.pipeline import logging_utils
+from flimsy.utils.ioer import load_yaml
+from flimsy.pipeline.pipeline import parse_config, validate_pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,7 @@ def get_parser():
     return parser
 
 def main():
+    t1 = time()
     parser = get_parser()
     args = parser.parse_args()
 
@@ -28,6 +32,16 @@ def main():
     logging_utils.configure_logging(os.path.join(args.logdir, 'logs/'), args.loglevel)
     logger.info('Welcome to flimsy - the Felsen Lab Integrated Modular analYsis package.')
     logger.debug(f'args:\n{args}')
+
+    config = load_yaml(args.config) ## TODO -- this needs some reworking (see pipeline.py)
+    pipeline = parse_config(config) ## TODO -- placeholder, since pipeline API not establishe yet. Probably need to return list of modules + some kind of param store for actually running it
+    validate_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
+    summary = run_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
+
+    t2 = time()
+    
+    logger.info(summary)
+    logger.info(f'Execution completed (runtime={t2-t1})')
 
 if __name__ == "__main__":
     main()
