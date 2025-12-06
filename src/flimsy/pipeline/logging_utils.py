@@ -32,6 +32,7 @@ def configure_logging(log_dir: str, level='info'):
         }))
 
     if log_dir is not None:
+        Path(log_dir).mkdir(exist_ok=True)
         log_file = os.path.join(log_dir, f'{current_time}.log')
         #Path(log_file).parent.mkdir(parents=True, exist_ok=True) ## TODO -- consider how we want to handle file creation
 
