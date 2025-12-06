@@ -16,3 +16,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def verify_output():
+    pass
+
+def should_overwrite():
+    pass

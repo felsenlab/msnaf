@@ -19,12 +19,11 @@ logger = logging.getLogger(__name__)
 def parse_pipeline(config):
     """Parses pipeline configs"""
     
-    
-
 def validate_pipeline():
     """Checks that provided pipeline config is valid (all inputs and dependencies are satisfied, all modules exist)"""
     pass
 
 def run_pipeline():
     """"""
-    pass
+    
+    return summary
