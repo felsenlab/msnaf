@@ -13,17 +13,20 @@
 
 import logging
 
+from flimsy.pipeline.registry import get_module
+
+
 logger = logging.getLogger(__name__)
 
 
-def parse_pipeline(config):
+def parse_config(config):
     """Parses pipeline configs"""
     
-def validate_pipeline():
+def validate_pipeline(pipeline):
     """Checks that provided pipeline config is valid (all inputs and dependencies are satisfied, all modules exist)"""
     pass
 
-def run_pipeline():
+def run_pipeline(pipeline):
     """"""
-    
+    summary = ''
     return summary
