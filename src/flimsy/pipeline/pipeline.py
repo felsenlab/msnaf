@@ -13,7 +13,9 @@
 
 import logging
 
-from flimsy.pipeline.registry import get_module
+import flimsy.pipeline.registry
+from flimsy.pipeline.registry import get_module, list_modules, load_all_modules
+from flimsy.pipeline.base import validate_output
 
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 def parse_config(config):
     """Parses pipeline configs"""
+    return []
     
 def validate_pipeline(pipeline):
     """Checks that provided pipeline config is valid (all inputs and dependencies are satisfied, all modules exist)"""
@@ -28,5 +31,18 @@ def validate_pipeline(pipeline):
 
 def run_pipeline(pipeline):
     """"""
-    summary = ''
+    summary = {}
+    load_all_modules()
+    logger.debug(list_modules())
+
+    ## TODO -- where does file come from? Do we want to require the first module to be a file creation module? How do we handle nwb vs h5 etc
+    for module_name in pipeline:
+        module = get_module(module_name)
+        output, messages = module(params[module_name])
+    
+        summary[module_name] = messages    
+        validate_output(module_name, output) #Checks that all expected keys are present and checks for common failure modes (nans, infs, etc)
+
+        #store output
+    
     return summary

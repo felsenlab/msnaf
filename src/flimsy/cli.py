@@ -2,7 +2,6 @@ import os
 from time import time
 import logging
 import argparse
-from pathlib import Path
 
 from flimsy.pipeline import logging_utils
 from flimsy.utils.ioer import load_yaml, pretty_print
@@ -30,12 +29,13 @@ def main():
     args = parser.parse_args()
 
     
-    Path(args.logdir, 'logs/').mkdir(parents=True, exist_ok=True) ## TODO -- maybe do this in logging? 
+    #Path(args.logdir, 'logs/').mkdir(parents=True, exist_ok=True) ## TODO -- maybe do this in logging? 
     logging_utils.configure_logging(os.path.join(args.logdir, 'logs/'), args.loglevel)
     logger.info('Welcome to flimsy - the Felsen Lab Integrated Modular analYsis package.')
     logger.debug(f'args:\n{args}')
 
     config = load_yaml(args.config) ## TODO -- this needs some reworking (see pipeline.py)
+    logger.debug(config)
     pipeline = parse_config(config) ## TODO -- placeholder, since pipeline API not establishe yet. Probably need to return list of modules + some kind of param store for actually running it
     validate_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
     summary = run_pipeline(pipeline) ## TODO -- may need to pass params from config or something here

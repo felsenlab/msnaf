@@ -14,10 +14,12 @@
 
 import logging
 
+from flimsy.pipeline.registry import get_module
+
 logger = logging.getLogger(__name__)
 
 
-def verify_output():
+def validate_output(module_name, output):
     pass
 
 def should_overwrite():

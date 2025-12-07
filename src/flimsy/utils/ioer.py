@@ -1,5 +1,6 @@
 import yaml
 import pickle as pkl
+from pathlib import Path
 
 def load_yaml(path: str) -> dict:
     """
