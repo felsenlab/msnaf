@@ -1,0 +1,30 @@
+modules:
+  # first module must be a file init
+  - initH5: ## Working
+    - 
+  # load all data into the h5 (we want the h5 to be the authoritative central repository). Modules must be "loader" type
+  - loadLabJackDataRig2.0: ## Working
+    - 
+  - loadStimulusMetadataRig2.0: ## Working
+    - 
+
+  # parse timing signals
+  - timestampCameraFrames: ## TODO -- where do the intervals get loaded? 
+    - 
+  - timestampStimulus: ## TODO -- can't do yet pending Ryan
+  - syncTimestamps:
+    - 
+
+  # processing modules here
+  - analyzeVideoWithDLC:
+    - 
+  - loadPoseEstimates: ## Working
+    - 
+  - correctPoseEstimates:
+    - 
+  - identifyCandidateSaccades:
+    - 
+  - classifyCandidateSaccades:
+    - 
+  - timestampSaccades:
+    - 

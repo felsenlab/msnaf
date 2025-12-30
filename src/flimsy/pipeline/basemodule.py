@@ -14,7 +14,7 @@
 
 import logging
 
-from flimsy.pipeline.registry import get_module
+from flimsy.pipeline.registry import module, requires, produces, param
 
 logger = logging.getLogger(__name__)
 

@@ -38,7 +38,10 @@ def main():
     logger.debug(config)
     pipeline = parse_config(config) ## TODO -- placeholder, since pipeline API not establishe yet. Probably need to return list of modules + some kind of param store for actually running it
     validate_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
+    logger.debug('Pipeline validated')
+    logger.debug('Pipeline execution started')
     summary = run_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
+    logger.debug('Pipeline execution complete')
     
     t2 = time()
     
