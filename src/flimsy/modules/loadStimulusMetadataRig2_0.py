@@ -26,7 +26,7 @@ def run(base_path, file_patterns, n_expected_files):
 		if len(metadata_files == n_expected_files):
 			metadata = pd.read_csv(metadata_files[0])
 			intervals = pd.read_csv(metadata_files[1])
-			res[pattern]["metadata"] = metadata
+			res[pattern]["metadata"] = metadata ## TODO -- what and where are we saving? pending figuring out how to split up the parsing and timestamping
 			res[pattern]["intervals"]
 			
 

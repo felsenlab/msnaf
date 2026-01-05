@@ -6,8 +6,7 @@ logger = logging.getLogger(__name__)
 
 @module(name="loadLabJackDataRig2.0", description="Reads and saves labjack signal into results file based on a channel map. Supports labjack format")
 @requires("filepath", description="Path to labjack data csv file")
-@produces("/labjack/raw/*")
-@produces("/labjack/raw/*")
+@produces("/labjack/*/raw")
 ## TODO -- 
 def run(filepath, channel_map):
     labjack_data = pd.read_csv(filepath)

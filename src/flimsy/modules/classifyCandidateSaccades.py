@@ -6,7 +6,7 @@ from flimsy.utils.ioer import load_pickle, load_from_h5, save_to_h5
 logger = logging.getLogger(__name__)
 
 @module(name='classifyCandidateSaccades')
-def run():
+def run(saccade_classifier_path, saccade_duration_regressor):
     ## load candidate waveforms
     ## load models
     ## normalize to peak velocity
@@ -15,8 +15,8 @@ def run():
     ## save out
 
     candidate_waveforms = load_from_h5(field)
-    saccade_type_classifier = ioer.load_pickle(cls_path)
-    onset_offset_regressor = ioer.load_pickle(reg_path)
+    saccade_type_classifier = load_pickle(cls_path)
+    onset_offset_regressor = load_pickle(reg_path)
 
     velocity_waveform = np.diff(candidate_waveforms) ## TODO -- is this horizontal only?
     normalized_waveforms = normalize_waveforms_by_velocity(velocity_waveform)
@@ -26,7 +26,16 @@ def run():
     ## TOOD -- save out
 
     for field in {}:
-        ioer.save_to_h5(field)
+        save_to_h5(field)
 
 def normalize_waveforms_by_velocity(waveform):
     return waveform / np.abs(waveform).max(axis=1).reshape(-1, 1)
+
+
+def extract_waveforms():
+    #candidate_waveforms = np.zeros((len(peak_indices), window_size))
+    waveform_indices = inds[:, None] + np.arange(-window_size, window_size)
+    waveform_timestamps = timestamps[waveform_indices]
+    candidate_waveform_x = horizontal_eye_position[waveform_indices]
+    candidate_waveform_y = vertical_eye_position[waveform_indices]
+    ## TODO -- combine waveforms

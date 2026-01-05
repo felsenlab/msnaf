@@ -5,7 +5,7 @@ modules:
   # load all data into the h5 (we want the h5 to be the authoritative central repository). Modules must be "loader" type
   - loadLabJackDataRig2.0: ## Working
     - 
-  - loadStimulusMetadataRig2.0: ## Working
+  - loadStimulusMetadataRig2.0: ## WIP
     - 
 
   # parse timing signals
@@ -20,9 +20,9 @@ modules:
     - 
   - loadPoseEstimates: ## Working
     - 
-  - correctPoseEstimates:
+  - correctPoseEstimates: ## Working
     - 
-  - identifyCandidateSaccades:
+  - identifyCandidateSaccades: ## Working
     - 
   - classifyCandidateSaccades:
     - 
