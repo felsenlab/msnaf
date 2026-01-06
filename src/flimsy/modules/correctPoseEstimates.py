@@ -8,7 +8,8 @@ from flimsy.pipeline.basemodule import *
 logger = logging.getLogger(__name__)
 
 @module(name='correctPoseEstimates')
-@produces('test')
+@requires("", )
+@produces('pose/corrected/{side}/')
 @param("smooth", description="", default=True)
 @param("framerate", default=150)
 @param("framedrop_threshold", default=1.5)
@@ -23,8 +24,8 @@ def run(pose, confidence_threshold, frame_intervals, framerate, framedrop_thresh
     pupil_pose, nasal_pose, temporal_pose, dorsal_pose, ventral_pose = pose ## TODO -- this is not robust at all
 
     masked_pupil_pose = mask_low_confidence_samples(pupil_pose, threshold=confidence_threshold)
-    masked_nasal_pose = mask_low_confidence_samples(pupil_pose, threshold=confidence_threshold)
-    masked_temporal_pose = mask_low_confidence_samples(nasal_pose, threshold=confidence_threshold)
+    masked_nasal_pose = mask_low_confidence_samples(nasal_pose, threshold=confidence_threshold)
+    masked_temporal_pose = mask_low_confidence_samples(temporal_pose, threshold=confidence_threshold)
     masked_dorsal_pose = mask_low_confidence_samples(dorsal_pose, threshold=confidence_threshold)
     masked_ventral_pose = mask_low_confidence_samples(ventral_pose, threshold=confidence_threshold)
 

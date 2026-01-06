@@ -32,6 +32,16 @@ Modules should take file paths or dataset paths and functions should take and ou
 Modules specify three things: 1) The name of the module, 2) Required inputs in the form of a list of named fields, and 3) the output of the module in the form of a list of named fields.
 
 
+#### Placeholders & Wildcards
+
+```python
+@produces("/pose/{bodypart}/raw")
+def load_pose(...):
+    ...
+```
+This says:
+>“This module will produce one or more concrete datasets, each corresponding to a specific value of bodypart.”
+
 
 #### Module registry
 

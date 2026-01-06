@@ -1,14 +1,18 @@
 import pandas as pd
 
 from flimsy.pipeline.basemodule import *
+from flimsy.utils.ioer import find_files_matching_pattern
 
 logger = logging.getLogger(__name__)
 
 @module(name="loadLabJackDataRig2.0", description="Reads and saves labjack signal into results file based on a channel map. Supports labjack format")
-@requires("filepath", description="Path to labjack data csv file")
-@produces("/labjack/*/raw")
-## TODO -- 
-def run(filepath, channel_map):
+@requires("/metadata/basepath/", description="Path to folder containing labjack data csv file")
+@produces("/labjack/{channel}/raw") ## TODO -- how to mark optional outputs? what we output kinda depends on the channel map...
+@param("file_pattern", description="String that will be used to identify the labjack data file. The wildcard operator * matches any number of characters (including none) in a file name, so a pattern like file_pattern='*labjack*.csv' will select all files that contain 'labjack' and end with '.csv', such as 'labjack_data.csv'; similarly, ? matches exactly one character.")
+## TODO -- I don't like have a default value here, but it feels annoying to make people put it in the config. 
+@param("channel_map", default={"AIN1":"stimulus", "FIO6":"camera", "FI06":"camera"}, description="YAML config file containing column name: common name pairs") ## TODO -- maybe get rid of this cause we can just take fieldnames in the later modules (NOTE: this is made annoying by the O/0 confusion)
+def run(basepath, channel_map, file_pattern):
+    filepath = find_files_matching_pattern(basepath, file_pattern)
     labjack_data = pd.read_csv(filepath)
     print(labjack_data.columns)
 
@@ -20,18 +24,6 @@ def run(filepath, channel_map):
     return res
 
 
-
-
-## TODO -- how to mark optional outputs? what we output kinda depends on the channel map...
-# @module(name='parseLabJackMetadata', requires=['labjack_datapath', 'channel_map'], produces=['frameTimestamps', 'cameraTimestamps'])
-# def parse_labjack_metadata(labjack_datapath, channel_map):
-#     lj_data = pd.read_csv(labjack_datapath)
-
-#     camera_edge_indices = parse_camera_signal(lj_data['channel_map']['camera'])
-#     frame_edge_indices = parse_frame_signal(lj_data['channel_map']['photologic'])
-
-#     camera_timestamps = timestamp_from_sample(lj_sample_timestamps, camera_edge_indices)
-#     frame_timestamps = timestamp_from_sample(lj_sample_timestamps, frame_edge_indices)
 
 
 

@@ -6,9 +6,10 @@ from scipy.signal import find_peaks
 logger = logging.getLogger(__name__)
 
 @module(name='identifyCandidateSaccadesByPeak')
-@produces()
+@requires("pose/corrected/left}")
+@produces("saccades/putative/left/indices")
 @param("velocity_threshold_percentile", description="Velocity percentile to be considered a candidate saccade in pixels/s. Default is 95th percentile", default=95)
-@param("distance_threshold_sampels", description="Minimum number of samples between peaks. Can be calculated using <time in seconds> * <camera_fps>. Default is 0.07s * 150fps = 10.5 samples", default=10.5)
+@param("distance_threshold_samples", description="Minimum number of samples between peaks. Can be calculated using <time in seconds> * <camera_fps>. Default is 0.07s * 150fps = 10.5 samples", default=10.5)
 def run(pupil_nt, velocity_threshold_percentile, distance_threshold_samples):
     # 1. calc horizontal velocity
     # 2. peak detection --> this is literally the entire extraction process
@@ -16,7 +17,7 @@ def run(pupil_nt, velocity_threshold_percentile, distance_threshold_samples):
     ## TODO -- probably want to do timestamp alignment first, so we can just directly compute saccade timestamps
     ## TODO -- possibly roll in with classification because detection is dead simple (probably not, since this couples detection with classification)
     horizontal_velocity = np.diff(pupil_nt)
-    velocity_threshold = np.nanpercentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- doubt this works real well for abnormal saccade distributions
+    velocity_threshold = np.percentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- I wonder how well this works for abnormal saccade distributions
     peak_indices, peak_properties = find_peaks(np.abs(horizontal_velocity), height=velocity_threshold, distance=distance_threshold_samples)
 
     return peak_indices

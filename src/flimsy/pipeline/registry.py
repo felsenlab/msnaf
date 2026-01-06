@@ -139,9 +139,6 @@ def module(*, name: str, description: Optional[str]=None, namespace: Optional[st
             "params": params_meta,
         }
 
-        
-        
-
         return fn
     return decorator
 

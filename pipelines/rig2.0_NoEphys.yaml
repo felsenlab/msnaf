@@ -1,30 +1,34 @@
 modules:
-  # first module must be a file init
-  - initH5: ## Working
-    - 
-  # load all data into the h5 (we want the h5 to be the authoritative central repository). Modules must be "loader" type
+  # TODO -- first module must be a file init?
+  - initH5
   - loadLabJackDataRig2.0: ## Working
-    - 
-  - loadStimulusMetadataRig2.0: ## WIP
-    - 
+    file_pattern: "labjack_data.csv"
+    channel_map:
+      AIN1: "stimulus"
+      FIO6: "camera"
+      FI06: "camera"
+      
+  #- loadStimulusMetadataRig2.0: ## WIP pending feedback
+  - timestampCameraFrames ## TODO -- where do the intervals get loaded? 
+  - analyzeVideoWithDLC:
+    video_pattern: "*Cam*.mp4"
+    dlc_path: "/home/nick/asdf/felsenlab/sacnet-josh-2025-01-29/config.yaml"
+  - loadPoseEstimates: ## Needs some work on requires/produces
+    file_pattern: "*DLC*.csv"
+  - correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
+    smooth: True
+    framerate: 150 ## TODO -- might be able to get from metadata file
+    framedrop_threshold: 1.5
+    confidence_threshold: 1.0
+
+  - identifyCandidateSaccades: ## TODO -- should this also produce candidate waveforms? 
+    velocity_threshold_percentile: 95
+    distance_threshold_samples: 10.5
+  - classifyCandidateSaccades: ## TODO -- fractional indices pls
+    window_size_samples: 30
+  - timestampSaccades: ## TODO -- needs to handle fractional indices
+    
 
   # parse timing signals
-  - timestampCameraFrames: ## TODO -- where do the intervals get loaded? 
-    - 
-  - timestampStimulus: ## TODO -- can't do yet pending Ryan
-  - syncTimestamps:
-    - 
-
-  # processing modules here
-  - analyzeVideoWithDLC:
-    - 
-  - loadPoseEstimates: ## Working
-    - 
-  - correctPoseEstimates: ## Working
-    - 
-  - identifyCandidateSaccades: ## Working
-    - 
-  - classifyCandidateSaccades:
-    - 
-  - timestampSaccades:
-    - 
+  #timestampStimulus: ## WIP pending feedback
+  #syncTimestamps: ## WIP pending feedback

@@ -6,14 +6,12 @@ from flimsy.pipeline.basemodule import *
 
 logger = logging.getLogger(__name__)
 
-## TODO -- is this necessary or should we make this part of the pipeline 
-#          (we need some way to make switching the output easy)
-@module(name="init_h5_file", description="")
-@requires("filepath")
-@param("prefix", default='')
-@produces("dummy") ## TODO -- how do we handle modules that don't produce h5 fields? Since they *should* all produce files, maybe this is trivial? We can just declare the path and check that the path exists
-def run(filepath, prefix):
+@module(name="init_h5", description="")
+@param("basepath", description="Folder that contains session data. Also serves as the output directory.")
+@param("prefix", default="", desrciption="String that gets pre-pended to the output file name. For example, if provided, the output file will be named {prefix}_results.h5")
+@produces("metadata/basepath", description="Saves location of the session folder for access by other modules")
+def run(basepath, prefix):
 	## TODO -- figure out how this is being passed so we can 
 	# make sure to append results.h5 to it or something
-	file = h5py.File(os.path.join(filepath, prefix), "w")
+	file = h5py.File(os.path.join(basepath, prefix), "w")
 	file.close()
