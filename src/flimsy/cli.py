@@ -12,13 +12,14 @@ logger = logging.getLogger(__name__)
 def get_parser():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--config', required=True) ## TODO -- finalize api
+    parser.add_argument('--pipeline', required=True) ## TODO -- finalize api
+    parser.add_argument('--run', required=True) ## TODO -- finalize api
     
-    parser.add_argument('--logdir', required=False)
+    parser.add_argument('--logdir', required=False, default=".")
 
     parser.add_argument('--overwrite', required=False, default='false', type=str, choices=['true', 'false', 'diff'])
 
-    parser.add_argument('--loglevel', default='info', choices=['debug', 'info', 'warning', 'error', 'critical'],
+    parser.add_argument('--loglevel', default='DEBUG', choices=['debug', 'info', 'warning', 'error', 'critical'],
             help='Set logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
 
     return parser
@@ -34,13 +35,14 @@ def main():
     logger.info('Welcome to flimsy - the Felsen Lab Integrated Modular analYsis package.')
     logger.debug(f'args:\n{args}')
 
-    config = load_yaml(args.config) ## TODO -- this needs some reworking (see pipeline.py)
-    logger.debug(config)
-    pipeline = parse_config(config) ## TODO -- placeholder, since pipeline API not establishe yet. Probably need to return list of modules + some kind of param store for actually running it
-    validate_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
-    logger.debug('Pipeline validated')
-    logger.debug('Pipeline execution started')
-    summary = run_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
+    pipeline_config = load_yaml(args.pipeline) ## TODO -- this needs some reworking (see pipeline.py)
+    run_config = load_yaml(args.run)
+    #logger.debug(config)
+    #pipeline = parse_config(config) ## TODO -- placeholder, since pipeline API not establishe yet. Probably need to return list of modules + some kind of param store for actually running it
+    #validate_pipeline(pipeline) ## TODO -- may need to pass params from config or something here
+    #logger.debug('Pipeline validated')
+    #logger.debug('Pipeline execution started')
+    summary = run_pipeline(pipeline_config, run_config) ## TODO -- may need to pass params from config or something here
     logger.debug('Pipeline execution complete')
     
     t2 = time()

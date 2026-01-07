@@ -8,41 +8,96 @@ from flimsy.pipeline.basemodule import *
 logger = logging.getLogger(__name__)
 
 @module(name='correctPoseEstimates')
-@requires("", )
-@produces('pose/corrected/{side}/')
+
+@requires("pose/uncorrected/left/nasal")
+@requires("pose/uncorrected/left/pupil")
+@requires("pose/uncorrected/left/temporal")
+@requires("pose/uncorrected/left/ventral")
+@requires("pose/uncorrected/left/dorsal")
+@requires("pose/uncorrected/right/nasal")
+@requires("pose/uncorrected/right/pupil")
+@requires("pose/uncorrected/right/temporal")
+@requires("pose/uncorrected/right/ventral")
+@requires("pose/uncorrected/right/dorsal")
+
+@requires("frames/left/intervals")
+@requires("frames/right/intervals")
+
+@produces("pose/filtered/left")
+@produces("pose/reoriented/left")
+@produces("pose/interpolated/left")
+
+@produces("pose/filtered/right")
+@produces("pose/reoriented/right")
+@produces("pose/interpolated/right")
+
 @param("smooth", description="", default=True)
 @param("framerate", default=150)
 @param("framedrop_threshold", default=1.5)
 @param("confidence_threshold", default=1.0)
-def run(pose, confidence_threshold, frame_intervals, framerate, framedrop_threshold, normalize=False, center=True, smooth=True):
-    # 1. blank low confidence estiamtes --> maybe zscore not raw threshold?
-    # 2. rotate / project onto nasal-temporal axis and center
-    # 3. find and blank dropped frames
-    # 4. interpolate gaps (low confidence + dropped frames)
-    ## TODO -- previous note that nans were being introduced at high-confidence samples
-    ## TODO -- do we want to median filter to remove high frequency noise?
-    pupil_pose, nasal_pose, temporal_pose, dorsal_pose, ventral_pose = pose ## TODO -- this is not robust at all
+@param("smoothing_window_size", default=np.round(150*0.003), description="Smoothing window size in samples. Default is 0.003 * 150fps = ~0.45")
+def run(data, params):
+    """
+     1. blank low confidence estiamtes --> maybe zscore not raw threshold?
+     2. rotate / project onto nasal-temporal axis and center
+     3. find and blank dropped frames
+     4. interpolate gaps (low confidence + dropped frames)
 
-    masked_pupil_pose = mask_low_confidence_samples(pupil_pose, threshold=confidence_threshold)
-    masked_nasal_pose = mask_low_confidence_samples(nasal_pose, threshold=confidence_threshold)
-    masked_temporal_pose = mask_low_confidence_samples(temporal_pose, threshold=confidence_threshold)
-    masked_dorsal_pose = mask_low_confidence_samples(dorsal_pose, threshold=confidence_threshold)
-    masked_ventral_pose = mask_low_confidence_samples(ventral_pose, threshold=confidence_threshold)
+    pose/corrected
+    x pose/decomposed
+    1. pose/filtered (masked??)
+    4. pose/interpolated
+    x pose/missing/left
+    x pose/missing/right
+    2. pose/reoriented
+    0. pose/uncorrected
+     """
+    
+    confidence_threshold = params["confidence_threshold"]
+    framedrop_threshold = params["framedrop_threshold"]
+    framerate = params["framerate"]
+    normalize = params["normalize"]
+    center = params["center"]
+    smooth = params["smooth"]
+    window_size = params["smoothing_window_size"]
 
-    corrected_pupil_pos = compute_pupil_projections(masked_pupil_pose, masked_nasal_pose, masked_temporal_pose, masked_dorsal_pose, masked_ventral_pose, normalize=normalize, center=center)
-    frames_to_insert = identify_dropped_frames(frame_intervals, len(corrected_pupil_pos), framerate, framedrop_threshold)
-    indexcorrected_pose = insert_frames(corrected_pupil_pos, frames_to_insert)
-    imputed_pose = interpolate_gaps(indexcorrected_pose)
-    if smooth:
-        pose_estimates = smooth_signal(imputed_pose)
-    else: 
-        pose_estimates = imputed_pose
+    res = {}
+    for side in ["left", "right"]: ## TODO -- this is not robust at all
+        logger.debug(side)
+        pupil_pose = data["pose/uncorrected/left/pupil"]
+        nasal_pose = data["pose/uncorrected/left/nasal"]
+        temporal_pose = data["pose/uncorrected/left/temporal"]
+        dorsal_pose = data["pose/uncorrected/left/dorsal"]
+        ventral_pose = data["pose/uncorrected/left/ventral"]
 
-    return pose_estimates
+        frame_intervals = data[f"frames/{side}/intervals"]
 
-def mask_low_confidence_samples(pose, confidence, threshold=1.0):
+        masked_pupil_pose = mask_low_confidence_samples(pupil_pose, threshold=confidence_threshold)
+        masked_nasal_pose = mask_low_confidence_samples(nasal_pose, threshold=confidence_threshold)
+        masked_temporal_pose = mask_low_confidence_samples(temporal_pose, threshold=confidence_threshold)
+        masked_dorsal_pose = mask_low_confidence_samples(dorsal_pose, threshold=confidence_threshold)
+        masked_ventral_pose = mask_low_confidence_samples(ventral_pose, threshold=confidence_threshold)
+
+        corrected_pupil_pos = compute_pupil_projections(masked_pupil_pose, masked_nasal_pose, masked_temporal_pose, masked_dorsal_pose, masked_ventral_pose, normalize=normalize, center=center)
+        dropped_frames, frames_to_insert = identify_dropped_frames(frame_intervals, len(corrected_pupil_pos), framerate, framedrop_threshold)
+        indexcorrected_pose = insert_frames(corrected_pupil_pos, frames_to_insert)
+        imputed_pose = interpolate_gaps(indexcorrected_pose)
+        if smooth:
+            pose_estimates = smooth_signal(imputed_pose, window_size)
+        else: 
+            pose_estimates = imputed_pose
+
+        res[f"pose/filtered/{side}"] = masked_pupil_pose
+        res[f"pose/reoriented/{side}"] = corrected_pupil_pos
+        res[f"pose/interpolated/{side}"] = imputed_pose
+
+    return res
+
+def mask_low_confidence_samples(pose, threshold=1.0):
+    confidence = pose[:,2]
     confidence_mask = confidence < threshold
-    pose[confidence_mask, [0,1]] = np.nan
+    pose[confidence_mask, 0] = np.nan
+    pose[confidence_mask, 1] = np.nan
     return pose
 
 # def rotate_and_center():
@@ -144,7 +199,7 @@ def compute_pupil_projections(
 
 def identify_dropped_frames(interframe_intervals, nframes, framerate, threshold):
     if len(interframe_intervals) != nframes:
-        raise Exception('Different number of frames ({nframes}) and timestamps ({len(interframe_intervals)})')
+        logger.warning(f'Different number of frames ({nframes}) and timestamps ({len(interframe_intervals)})')
 
     expected_interval = 1e9 / framerate ## 1e9 = nanoseconds
     ratio = interframe_intervals/expected_interval
@@ -152,20 +207,31 @@ def identify_dropped_frames(interframe_intervals, nframes, framerate, threshold)
 
     to_insert = []
     for index in dropped_indices:
-        n_dropped_frames = np.round(ratio[index], 0) - 1
-        to_insert.append(range(index, index+n_dropped_frames))
+        n_dropped_frames = int(np.round(ratio[index], 0) - 1)
 
+        logger.debug(index)
+        logger.debug(index+n_dropped_frames)
+        logger.debug(ratio[index])
+
+        to_insert.extend(list(range(index, index+n_dropped_frames)))
+
+    logger.warning(f'dropped_indices: {dropped_indices}')
+    logger.debug(f'to_insert: {to_insert}')
     return dropped_indices, to_insert
 
 # TODO -- intervals have sub_ms jitter (+-0.001 ms), consistently 0.0003 ms higher than theoretical perfect
 def insert_frames(projections, to_insert):
-    value = np.array([np.nan, np.nan])
+    logger.debug(projections.shape)
+    logger.debug(type(projections))
+    logger.debug(to_insert)
+
+    value = np.nan
     corrected = np.insert(projections, to_insert, value, axis=0)
 
     return corrected
 
 def smooth_signal(signal, window_size):
-    sigma = np.round(fps * window_size, 2)
+    sigma = np.round(window_size, 2)
     return gaussian_filter1d(signal, sigma=sigma, axis=0)
 
 def interpolate_gaps(pose):
@@ -173,9 +239,41 @@ def interpolate_gaps(pose):
     interpolated = np.copy(pose)
     for column_index in range(n_columns):
         values = pose[:,column_index]
-        indices_to_interp = np.where(np.isnan(values))
+        indices_to_interp = np.where(np.isnan(values))[0]
         indices = np.arange(0, n_samples)
         ## NOTE: x is target indices to interp, xp and fp are real data to interp from
-        interpolated_values = np.interp(x=indices_to_interp, xp=indices, fp=pose) 
+        logger.debug(indices_to_interp)
+        logger.debug(indices.shape)
+        logger.debug(values.shape)
+        
+        interpolated_values = np.interp(x=indices_to_interp, xp=indices, fp=values) 
         interpolated[indices_to_interp, column_index] = interpolated_values
     return interpolated
+
+
+# def run(pose, confidence_threshold, frame_intervals, framerate, framedrop_threshold, normalize=False, center=True, smooth=True):
+#     """
+#      1. blank low confidence estiamtes --> maybe zscore not raw threshold?
+#      2. rotate / project onto nasal-temporal axis and center
+#      3. find and blank dropped frames
+#      4. interpolate gaps (low confidence + dropped frames)
+#      """
+    
+#     pupil_pose, nasal_pose, temporal_pose, dorsal_pose, ventral_pose = pose ## TODO -- this is not robust at all
+
+#     masked_pupil_pose = mask_low_confidence_samples(pupil_pose, threshold=confidence_threshold)
+#     masked_nasal_pose = mask_low_confidence_samples(nasal_pose, threshold=confidence_threshold)
+#     masked_temporal_pose = mask_low_confidence_samples(temporal_pose, threshold=confidence_threshold)
+#     masked_dorsal_pose = mask_low_confidence_samples(dorsal_pose, threshold=confidence_threshold)
+#     masked_ventral_pose = mask_low_confidence_samples(ventral_pose, threshold=confidence_threshold)
+
+#     corrected_pupil_pos = compute_pupil_projections(masked_pupil_pose, masked_nasal_pose, masked_temporal_pose, masked_dorsal_pose, masked_ventral_pose, normalize=normalize, center=center)
+#     frames_to_insert = identify_dropped_frames(frame_intervals, len(corrected_pupil_pos), framerate, framedrop_threshold)
+#     indexcorrected_pose = insert_frames(corrected_pupil_pos, frames_to_insert)
+#     imputed_pose = interpolate_gaps(indexcorrected_pose)
+#     if smooth:
+#         pose_estimates = smooth_signal(imputed_pose)
+#     else: 
+#         pose_estimates = imputed_pose
+
+#     return pose_estimates

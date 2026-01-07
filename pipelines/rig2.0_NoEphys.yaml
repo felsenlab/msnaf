@@ -1,34 +1,40 @@
-modules:
-  # TODO -- first module must be a file init?
-  - initH5
-  - loadLabJackDataRig2.0: ## Working
+# TODO -- first module must be a file init?
+initH5:
+  metadata_pattern: "metadata.txt"
+loadLabJackDataRig2.0: ## Working
     file_pattern: "labjack_data.csv"
     channel_map:
       AIN1: "stimulus"
       FIO6: "camera"
       FI06: "camera"
-      
-  #- loadStimulusMetadataRig2.0: ## WIP pending feedback
-  - timestampCameraFrames ## TODO -- where do the intervals get loaded? 
-  - analyzeVideoWithDLC:
-    video_pattern: "*Cam*.mp4"
-    dlc_path: "/home/nick/asdf/felsenlab/sacnet-josh-2025-01-29/config.yaml"
-  - loadPoseEstimates: ## Needs some work on requires/produces
-    file_pattern: "*DLC*.csv"
-  - correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
-    smooth: True
-    framerate: 150 ## TODO -- might be able to get from metadata file
-    framedrop_threshold: 1.5
-    confidence_threshold: 1.0
+timestampCameraFrames:
+  sampling_rate: 2000
+  interval_pattern: "*Cam_timestamps.txt" ## TODO -- where do the intervals get loaded? 
 
-  - identifyCandidateSaccades: ## TODO -- should this also produce candidate waveforms? 
-    velocity_threshold_percentile: 95
-    distance_threshold_samples: 10.5
-  - classifyCandidateSaccades: ## TODO -- fractional indices pls
-    window_size_samples: 30
-  - timestampSaccades: ## TODO -- needs to handle fractional indices
-    
+#- loadStimulusMetadataRig2.0: ## WIP pending feedback
+analyzeVideoWithDLC:
+  video_pattern: "*Cam*.mp4"
+  dlc_path: "sacnet-josh-2025-01-29/config.yaml" ## GET REAL PATH ON WORKSTATIOn
+loadPoseEstimates: ## Needs some work on requires/produces
+  file_pattern: "*DLC*.h5"
+correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
+  smooth: True
+  center: True
+  normalize: False
+  framerate: 150 ## TODO -- might be able to get from metadata file
+  framedrop_threshold: 1.5
+  confidence_threshold: 1.0
 
-  # parse timing signals
-  #timestampStimulus: ## WIP pending feedback
-  #syncTimestamps: ## WIP pending feedback
+identifyCandidateSaccades:
+  velocity_threshold_percentile: 95
+  distance_threshold_samples: 10.5
+# - classifyCandidateSaccades: 
+#     saccade_classifier_path: ## TODO -- need to figure out what model greg's pipeline was using
+#     saccade_duration_regressor:  ## TODO -- need to figure out what model greg's pipeline was using
+#     window_size_samples: 30
+# - timestampSaccades
+  
+
+# parse timing signals
+#timestampStimulus: ## WIP pending feedback
+#syncTimestamps: ## WIP pending feedback

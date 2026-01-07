@@ -3,6 +3,7 @@ The registry is a central respository of available modules.
 """
 import pkgutil
 import logging
+import importlib
 from pathlib import Path
 from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple

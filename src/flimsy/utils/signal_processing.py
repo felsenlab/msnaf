@@ -1,5 +1,8 @@
 import logging
 
+from sklearn.mixture import GaussianMixture
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
