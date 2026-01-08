@@ -33,7 +33,7 @@ def run(data, params):
         velocity_threshold = np.percentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- I wonder how well this works for abnormal saccade distributions
         peak_indices, peak_properties = find_peaks(np.abs(horizontal_velocity), height=velocity_threshold, distance=distance_threshold_samples)
         
-        res[f"saccades/putative/{side}/indices"] = peak_indices\
+        res[f"saccades/putative/{side}/indices"] = peak_indices
         
         logger.debug(f"vthresh: {velocity_threshold}")
         logger.debug(f"nans: {np.isnan(horizontal_velocity).sum()}")

@@ -52,6 +52,8 @@ def run(data, params):
         #candidate_waveforms = extract_waveforms(pupil_nt_pose, candidate_saccade_indices, window_size_samples)
         candidate_waveforms, timepoints = extract_and_resample_waveforms(pupil_nt_pose, candidate_saccade_indices, frametimestamps, window_size_time, n_samples)
 
+        logger.error(timepoints.shape)
+
         logger.debug(candidate_waveforms.shape)
         logger.debug(candidate_saccade_indices.shape)
 
@@ -73,7 +75,7 @@ def run(data, params):
 
         real = np.where(predicted_labels != 0)[0]
 
-        absolute_epochs = get_absolute_saccade_epochs(candidate_saccade_indices[real], predicted_epochs[real], timepoints)
+        absolute_epochs = get_absolute_saccade_epochs(candidate_saccade_indices[real], predicted_epochs[real], timepoints[real])
         absolute_indices = get_frames_from_timestamps(absolute_epochs, frametimestamps)
 
         logger.debug(f"Real saccade indices: {real} (n={real.shape[0]})")
@@ -115,6 +117,11 @@ def get_absolute_saccade_epochs(saccade_indices, epochs, resampled_timestamps):
         midtime = np.interp(midpoint, np.arange(t.size), t)
         epoch_timestamp = epochs[i] + midtime
         epoch_timestamps[i] = epoch_timestamp
+        # logger.debug(f"i: {i}, peakindex: {peak_index}")
+        # logger.debug(f"resampled_timepoints: {t}")
+        # logger.debug(f"midpoint: {midpoint}")
+        logger.debug(f"midtime: {midtime}")
+        # logger.debug(f"epoch_timestamp: {epoch_timestamp}")
 
     return epoch_timestamps
 
