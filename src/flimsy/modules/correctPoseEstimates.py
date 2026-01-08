@@ -113,6 +113,17 @@ def mask_low_confidence_samples(pose, threshold=1.0):
 #     mean_subtracted =  
 #     horizontal_projection = np.dot(, )
 
+def compute_pupil_projections():
+    nasal   = np.nanmean(nasal_xy,   axis=0)
+    temporal= np.nanmean(temporal_xy,axis=0)
+    dorsal  = np.nanmean(dorsal_xy,  axis=0) # upper
+    ventral = np.nanmean(ventral_xy, axis=0) #lower
+
+    nt = temporal-nasal
+    dv = ventral - dorsal
+
+    x = pupil_xy
+
 def compute_pupil_projections(
     pupil_xy,
     nasal_xy,
@@ -167,7 +178,7 @@ def compute_pupil_projections(
 
     # Axis vectors
     nt = temporal - nasal           # nasal -> temporal
-    dv = ventral - dorsal           # dorsal -> ventral
+    dv = ventral - dorsal           # dorsal -> ventral #l-u
 
     nt_len = np.linalg.norm(nt)
     dv_len = np.linalg.norm(dv)

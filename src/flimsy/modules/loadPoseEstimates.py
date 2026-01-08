@@ -37,7 +37,7 @@ def run(data, params):
 
     #check_scorer_matches_map()
 	
-    body_part_map = {'N': 'nasal', 'P': 'pupil', 'T': 'temporal', 'U': 'ventral', 'L': 'dorsal'}
+    body_part_map = {'N': 'nasal', 'P': 'pupil', 'T': 'temporal', 'L': 'ventral', 'U': 'dorsal'}
 
     res = {}
     for filename in dlc_output_file_list:
