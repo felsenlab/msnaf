@@ -1,4 +1,3 @@
 initH5:
   basepath:
-    # - "/home/user/felsenlab/session005" ## EXAMPLES
-    # - "/home/user/felsenlab/session007"
+    - /home/schollab-dion/Documents/felsen_pipeline/garcian/session005

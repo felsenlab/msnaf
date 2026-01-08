@@ -246,8 +246,11 @@ def interpolate_gaps(pose):
         logger.debug(indices.shape)
         logger.debug(values.shape)
         
-        interpolated_values = np.interp(x=indices_to_interp, xp=indices, fp=values) 
+        interpolated_values = np.interp(x=indices_to_interp, xp=indices[~indices_to_interp], fp=values[~indices_to_interp]) 
+        logger.debug(f"to_interp: {indices_to_interp}")
+        logger.debug(f"interp_values: {interpolated_values}")
         interpolated[indices_to_interp, column_index] = interpolated_values
+    logger.debug(np.isnan(interpolated).sum())
     return interpolated
 
 

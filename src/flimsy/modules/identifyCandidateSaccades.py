@@ -8,8 +8,8 @@ from flimsy.pipeline.basemodule import *
 logger = logging.getLogger(__name__)
 
 @module(name='identifyCandidateSaccades')
-@requires("pose/filtered/left")
-@requires("pose/filtered/right")
+@requires("pose/interpolated/left")
+@requires("pose/interpolated/right")
 @produces("saccades/putative/left/indices")
 @produces("saccades/putative/right/indices")
 @param("velocity_threshold_percentile", description="Velocity percentile to be considered a candidate saccade in pixels/s. Default is 95th percentile", default=95)
@@ -26,12 +26,18 @@ def run(data, params):
 
     res = {}
     for side in ["left", "right"]:
-        pupil_nt = data[f"pose/filtered/{side}"]
+        pupil_nt = data[f"pose/interpolated/{side}"]
         horizontal_velocity = np.diff(pupil_nt[:,0])
-        velocity_threshold = np.percentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- I wonder how well this works for abnormal saccade distributions
+        ## TODO -- THERE REALLY SHOULDNT BE NANS HERE. WHY IS THIS FAILING
+        velocity_threshold = np.nanpercentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- I wonder how well this works for abnormal saccade distributions
         peak_indices, peak_properties = find_peaks(np.abs(horizontal_velocity), height=velocity_threshold, distance=distance_threshold_samples)
         
-        res[f"saccades/putative/{side}/indices"] = peak_indices
+        res[f"saccades/putative/{side}/indices"] = peak_indices\
+        
+        logger.debug(f"vthresh: {velocity_threshold}")
+        logger.debug(f"nans: {np.isnan(horizontal_velocity).sum()}")
+        logger.debug(f"vmax: {horizontal_velocity.max()}")
+        logger.debug(f"peaks: {peak_indices.shape}")
 
     return res
 

@@ -2,7 +2,7 @@ import pandas as pd
 
 from flimsy.pipeline.basemodule import *
 from flimsy.utils.ioer import find_files_matching_pattern
-from flimsy.utils.validation import check_scorer_matches_map
+#from flimsy.utils.validation import check_scorer_matches_map
 
 logger = logging.getLogger(__name__)
 
