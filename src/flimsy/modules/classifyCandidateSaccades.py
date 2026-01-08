@@ -74,16 +74,26 @@ def run(data, params):
         real = np.where(predicted_labels != 0)[0]
 
         absolute_epochs = get_absolute_saccade_epochs(candidate_saccade_indices[real], predicted_epochs[real], timepoints)
+        absolute_indices = get_frames_from_timestamps(absolute_epochs, frametimestamps)
 
         logger.debug(f"Real saccade indices: {real} (n={real.shape[0]})")
         logger.debug(predicted_labels)
 
         res[f"saccades/predicted/{side}/labels"] = predicted_labels[real]
-        res[f"saccades/predicted/{side}/epochs"] = absolute_epochs #predicted_epochs[real]
+        res[f"saccades/predicted/{side}/timestamps"] = absolute_epochs
+        res[f"saccades/predicted/{side}/indices"] = absolute_indices
+        res[f"saccades/predicted/{side}/epochs"] = predicted_epochs[real]
         res[f"saccades/predicted/{side}/waveforms"] = candidate_waveforms[real]
 
     return res
 
+
+def get_frames_from_timestamps(indices, timestamps):
+    frameindices = np.full(indices.shape, np.nan)
+    frameindices[:,0] = np.interp(indices[:,0], timestamps, range(timestamps.size))
+    frameindices[:,1] = np.interp(indices[:,1], timestamps, range(timestamps.size))
+
+    return frameindices
 
 def normalize_waveforms_by_velocity(waveforms):
     return waveforms / np.abs(waveforms).max(axis=1).reshape(-1, 1)
