@@ -30,12 +30,13 @@ logger = logging.getLogger(__name__)
 @produces("pose/filtered/right")
 @produces("pose/reoriented/right")
 @produces("pose/interpolated/right")
+@produces("pose/smoothed/right")
 
 @param("smooth", description="", default=True)
 @param("framerate", default=150)
 @param("framedrop_threshold", default=1.5)
 @param("confidence_threshold", default=1.0)
-@param("smoothing_window_size", default=np.round(150*0.003), description="Smoothing window size in samples. Default is 0.003 * 150fps = ~0.45")
+@param("smoothing_window_size", default=np.round(150*0.003, 2), description="Smoothing window size in samples. Default is 0.003 * 150fps = ~0.45")
 def run(data, params):
     """
      1. blank low confidence estiamtes --> maybe zscore not raw threshold?
@@ -84,12 +85,14 @@ def run(data, params):
         imputed_pose = interpolate_gaps(indexcorrected_pose)
         if smooth:
             pose_estimates = smooth_signal(imputed_pose, window_size)
+            res[f"pose/smoothed/{side}"] = pose_estimates
         else: 
             pose_estimates = imputed_pose
 
-        res[f"pose/filtered/{side}"] = masked_pupil_pose
+        res[f"pose/masked/{side}"] = masked_pupil_pose
         res[f"pose/reoriented/{side}"] = corrected_pupil_pos
         res[f"pose/interpolated/{side}"] = imputed_pose
+        
 
     return res
 
@@ -232,6 +235,7 @@ def insert_frames(projections, to_insert):
 
 def smooth_signal(signal, window_size):
     sigma = np.round(window_size, 2)
+    logger.debug(f"sigma: {sigma}, window_size: {window_size}")
     return gaussian_filter1d(signal, sigma=sigma, axis=0)
 
 def interpolate_gaps(pose):

@@ -8,8 +8,8 @@ from flimsy.pipeline.basemodule import *
 logger = logging.getLogger(__name__)
 
 @module(name='identifyCandidateSaccades')
-@requires("pose/interpolated/left")
-@requires("pose/interpolated/right")
+@requires("pose/smoothed/left")
+@requires("pose/smoothed/right")
 @produces("saccades/putative/left/indices")
 @produces("saccades/putative/right/indices")
 @param("velocity_threshold_percentile", description="Velocity percentile to be considered a candidate saccade in pixels/s. Default is 95th percentile", default=95)
@@ -26,10 +26,11 @@ def run(data, params):
 
     res = {}
     for side in ["left", "right"]:
-        pupil_nt = data[f"pose/interpolated/{side}"]
+        pupil_nt = data[f"pose/smoothed/{side}"]
+        logger.debug(f"pose:shape - {pupil_nt[:,0].shape}")
         horizontal_velocity = np.diff(pupil_nt[:,0])
         ## TODO -- THERE REALLY SHOULDNT BE NANS HERE. WHY IS THIS FAILING
-        velocity_threshold = np.nanpercentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- I wonder how well this works for abnormal saccade distributions
+        velocity_threshold = np.percentile(horizontal_velocity, velocity_threshold_percentile) ## TODO -- I wonder how well this works for abnormal saccade distributions
         peak_indices, peak_properties = find_peaks(np.abs(horizontal_velocity), height=velocity_threshold, distance=distance_threshold_samples)
         
         res[f"saccades/putative/{side}/indices"] = peak_indices\

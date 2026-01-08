@@ -14,7 +14,7 @@ timestampCameraFrames:
 #- loadStimulusMetadataRig2.0: ## WIP pending feedback
 analyzeVideoWithDLC:
   video_pattern: "*Cam*.mp4"
-  dlc_path: "home/schollab-dion/Documents/DeepLabCut/sacnet-josh-2025-01-29/config.yaml" ## GET REAL PATH ON WORKSTATIOn
+  dlc_path: "/home/nick/asdf/felsenlab/sacnet-josh-2025-01-29/config.yaml" ## GET REAL PATH ON WORKSTATIOn
 loadPoseEstimates: ## Needs some work on requires/produces
   file_pattern: "*DLC*.h5"
 correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
@@ -29,10 +29,10 @@ identifyCandidateSaccades:
   velocity_threshold_percentile: 95
   distance_threshold_samples: 10.5
 classifyCandidateSaccades: 
-  saccade_classifier_path: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/classifier.pkl
-  saccade_duration_regressor: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
-  window_size_samples: 26
-timestampSaccades: {}
+  saccade_classifier_path: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/classifier.pkl
+  saccade_duration_regressor: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+  window_size_time: 0.2
+#timestampSaccades: {}
   
 
 # parse timing signals
