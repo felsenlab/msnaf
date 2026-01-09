@@ -88,7 +88,7 @@ A list of available modules is maintained by the pipeline. When the pipeline is 
 
 #### Adding a new modules
 
-Adding modules is reasonably straightforward. As explained above, modules are functions that are decorated with various metadata (@module, @requires, @produces, and @param). You can add a new module using the template below. Note that a module MUST declare a name and at least one @produces field. 
+Adding modules is reasonably straightforward. As explained above, modules are functions that are decorated with various metadata (`@module`, `@requires`, `@produces`, and `@param`). You can add a new module using the template below. Note that a module MUST declare a name and at least one @produces field. The pipeline calls each module as `module_fn(data, params)`, where all the `@requires` fields are provided in `data` as a `dict`, and all the `@params` are provided in `params` as a `dict`. These can be accessed inside the module as `data[<fieldname>]`, where `fieldname` is the name of the param or requries field. 
 
 ```python
 from flimsy.pipeline.basemodule import * ## initalizes components required for all modules
@@ -106,6 +106,8 @@ Every source file in the repository implements a python logger. This logger prin
 
 ### Pipelines
 Pipelines are a collection of modules that get run in order. They are defined by YAML config files, which contain a list of modules and parameters. Example pipelines are shown below. To add a module to the pipeline, simply add it's name to the list. Modules with user definable params (e.g., any @param declarations) can be specified using the colon, indent, param_name pattern seen in the template. Modules without params should be set to {} (an empty dict).
+
+The pipeline steps through the list of modules one at a time: first it loads the data declared in the `@requires` and `@params` decorators and passes this data to the module as `data` and `params`. It then executes the module and saves the output to the output file. 
 
 ```yaml
 initH5:
