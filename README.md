@@ -1,11 +1,11 @@
 ## Installation
 1. Install conda
-2. Clone the git repo (git clone https://github.com/felsenlab/msnaf)
-3. Create the conda repo: conda env create --file msnaf/environment.yaml
-4. Activate conda environment: conda activate deeplabcut-tensorflow
-5. Install MSNAF: pip install -e .
+2. Clone the git repo (`git clone https://github.com/felsenlab/msnaf`)
+3. Create the conda repo: `conda env create --file msnaf/environment.yaml`
+4. Activate conda environment: `conda activate deeplabcut-tensorflow`
+5. Install MSNAF: `pip install -e .`
 
-Note that the `pip install -e .` installs the package as editable. That means that any changes to the repository are immediately reflected without reinstalling the package. This also means that only ONE version of the package exists on the system. Never again do you have to navigate to /home/user/anaconda3/envs/deeplabcut-tensorflow/lib/python3.10/site-packages/flimsy to edit a file!
+Note that the `pip install -e .` installs the package as editable. That means that any changes to the repository are immediately reflected without reinstalling the package. This also means that only ONE version of the package exists on the system. Never again do you have to navigate to `/home/user/anaconda3/envs/deeplabcut-tensorflow/lib/python3.10/site-packages/flimsy` to edit a file!
 
 # Usage
 ### Run Pipeline
@@ -42,13 +42,13 @@ Modules can load files, but should not modify existing files or create new files
 
 Modules are just functions, but we use a python feature called Decorators to add additional metadata to them so the pipeline knows what to do with them. Decorators are just functions, and you call them just like you would any other function. 
 
-The first decorator is the @module tag. This declares the module name and a description. When the module is imported, the decorator labels the run function with the name and desription and adds the module adds the module to a central registry (discussed in the next step).
+The first decorator is the `@module` tag. This declares the module name and a description. When the module is imported, the decorator labels the run function with the name and desription and adds the module adds the module to a central registry (discussed in the next step).
 
-The next decorator is the @requires tag. This declares that the module needs data contained in the "Foo" field of results file. When the pipeline gets to this module in the pipeline, it will load this data and pass it to the module.
+The next decorator is the `@requires` tag. This declares that the module needs data contained in the `"Foo"` field of results file. When the pipeline gets to this module in the pipeline, it will load this data and pass it to the module.
 
-The next decorator is the @param tag. Similar to @requires, this decorator tells the pipeline that the module needs this data to run. In contrast to the @requires decorator though, @params MUST be provided by the user, either in the pipeline configuration file or the run configuration file (see below for sections on those files). Optionally, a default value can be set, which is used if an overriding value is not provided in the pipeline config or run config. 
+The next decorator is the `@param` tag. Similar to `@requires`, this decorator tells the pipeline that the module needs this data to run. In contrast to the @requires decorator though, @params MUST be provided by the user, either in the pipeline configuration file or the run configuration file (see below for sections on those files). Optionally, a default value can be set, which is used if an overriding value is not provided in the pipeline config or run config. 
 
-The last decorator is @produces. This decorator tells the pipeline what data the module will return, and what to call it. The pipeline will save the data produced by the module to the field name provided. 
+The last decorator is `@produces`. This decorator tells the pipeline what data the module will return, and what to call it. The pipeline will save the data produced by the module to the field name provided. 
 
 ```python
 @module(name="identifyCandidateSaccades", description="Identifies candidate events based on threshold of horizontal eye velocity")
@@ -80,11 +80,11 @@ This says:
 #### Module registry
 A list of available modules is maintained by the pipeline. When the pipeline is started, it begins by loading all of the files in the module directory. Each module is registered in a central repository. This repository can be queried to obtain 1) a list of available modules, 2) detailed information about a module, and 3) find modules which produce a desired data field.
 
-> `flimsy --list_modules`
+ `flimsy --list_modules`
 
-> `flimsy --module_help identifyCandidateSaccades`
+ `flimsy --module_help identifyCandidateSaccades`
 
-> `flimsy --produces saccades/predicted/waveforms`
+ `flimsy --produces saccades/predicted/waveforms`
 
 #### Adding a new modules
 
