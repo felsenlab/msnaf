@@ -179,6 +179,74 @@ def validate_module_registry():
 
 ############ PUBLIC GETTERS ############
 
+
+def summarize_module(module_name: str, show_paths: bool = True) -> str:
+    """
+    Generate a formatted summary of a module.
+
+    Args:
+        module: A module object registered with @module decorator.
+        show_paths: If True, display the HDF5 paths for requires/produces.
+
+    Returns:
+        Formatted string summary of the module.
+    """
+    if not _MODULES_LOADED:
+        load_all_modules()
+
+    lines = []
+
+    # Basic info
+    if module_name in _MODULES:
+        module = get_module(module_name)
+    else:
+        logger.warning(f"{module_name} is not a registered module. Use --list_modules for a list of all registered modules")
+        return
+    description = module['description']
+    lines.append(f"Module: {module_name}")
+    lines.append(f"Description: {description}\n")
+
+    # Parameters
+    params = module["params"]
+    if params:
+        lines.append("Parameters:")
+        for p in params:
+            pname = p.get("name", "UNKNOWN")
+            pdesc = p.get("description", "")
+            pdefault = p.get("default", "<required>")
+            lines.append(f"  - {pname}: {pdesc} (default: {pdefault})")
+        lines.append("")
+
+    # Requires
+    requires = module["requires"]
+    if requires:
+        lines.append("Required inputs:")
+        for r in requires:
+            rname = r.get("name", "UNKNOWN")
+            rdesc = r.get("description", "")
+            rpath = r.get("path", "")
+            if show_paths:
+                lines.append(f"  - {rname}: {rdesc} (path: {rpath})")
+            else:
+                lines.append(f"  - {rname}: {rdesc}")
+        lines.append("")
+
+    # Produces
+    produces = module["produces"]
+    if produces:
+        lines.append("Outputs:")
+        for p in produces:
+            pname = p.get("name", "UNKNOWN")
+            pdesc = p.get("description", "")
+            ppath = p.get("path", "")
+            if show_paths:
+                lines.append(f"  - {pname}: {pdesc} (path: {ppath})")
+            else:
+                lines.append(f"  - {pname}: {pdesc}")
+        lines.append("")
+
+    return "\n".join(lines)
+
 ## TODO -- these are all wrong. ensure they are up to date with the API (specifically, need to handle namespaces)
 def list_modules() -> List[str]:
     _ensure_loaded()

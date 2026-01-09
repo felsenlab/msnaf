@@ -6,7 +6,7 @@ __pycache__/
 logs/
 
 pipelines/rig2.0_NoEphys.yaml
-tests/test_run_config.yaml
+tests/
 
 TODO.md
 sandbox.ipynb
