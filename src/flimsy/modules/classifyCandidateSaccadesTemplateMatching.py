@@ -2,13 +2,15 @@ import logging
 
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
+from numpy.lib.stride_tricks import sliding_window_view
+
 
 from flimsy.pipeline.basemodule import *
 from flimsy.utils.ioer import load_pickle
 
 logger = logging.getLogger(__name__)
 
-@module(name='classifyCandidateSaccades', description="NOTE: Saccade onsets and offsets are aligned to the nearest frame, thus limiting the maximum temporal resolution to 1/fps, or ~7 ms at 150fps.\nNOTE: Classifiers only consider normalize horizontal velocity. They are not sensitive to amplitude, vertical velocity, or any other features")
+@module(name='classifyCandidateSaccadesTemplateMatching', description="NOTE: Saccade onsets and offsets are aligned to the nearest frame, thus limiting the maximum temporal resolution to 1/fps, or ~7 ms at 150fps.\nNOTE: Classifiers only consider normalize horizontal velocity. They are not sensitive to amplitude, vertical velocity, or any other features")
 @requires("saccades/putative/left/indices")
 @requires("saccades/putative/right/indices")
 @requires("pose/smoothed/left")
@@ -17,25 +19,27 @@ logger = logging.getLogger(__name__)
 #@produces("saccades/predicted/{side}/labels", description="Classification for each candidate waveform. Labels are 1, 0, or 1 for n/t, noise, or n/t respectively.")
 #@produces("saccades/predicted/{side}/epochs", description="Frame index of saccade onsets for each candidate waveform") ## TODO -- maybe exclude noise events?
 #@produces("saccade_offset", description="Frame index of saccade offsets for each candidate waveform") ## TODO -- maybe exclude noise events?
-@param("window_size_samples", description="Number of samples to extract on each side of a candidate event in samples. Can be calculated using <time in seconds> * <camera_fps>. The default is 30, for 71 total samples", default=26)
 @param("window_size_time", default=0.2, description="Time to extract on each side of a candidate event. Default is 0.2, units unknown")
 @param("n_samples", default=51, description="Number of points to use for resampling candidate waveforms")
-@param("saccade_classifier_path", description="")
 @param("saccade_duration_regressor", description="")
+@param("template_similarity_threshold", default=0.85)
+@param("ptp_threshold", default=3.75)
+@param("template")
 
-@produces("saccades/predicted/left/labels")
-@produces("saccades/predicted/right/labels")
+@produces("saccades/template_matching/left/labels")
+@produces("saccades/template_matching/right/labels")
 
-@produces("saccades/predicted/left/epochs")
-@produces("saccades/predicted/right/epochs")
+@produces("saccades/template_matching/left/epochs")
+@produces("saccades/template_matching/right/epochs")
 
 def run(data, params):
-    window_size_samples = params["window_size_samples"]
     window_size_time = params["window_size_time"]
     n_samples = params["n_samples"]
-    saccade_classifier_path = params["saccade_classifier_path"]
-    saccade_duration_regressor = params["saccade_duration_regressor"]
     frametimestamps = data["labjack/cameras/timestamps"]
+
+    template = np.load(params["template"])
+    template_similarity_threshold = params["template_similarity_threshold"]
+    ptp_threshold = params["ptp_threshold"]
 
     res = {}
     for side in ["left", "right"]:
@@ -58,41 +62,46 @@ def run(data, params):
         logger.debug(candidate_waveforms.shape)
         logger.debug(candidate_saccade_indices.shape)
 
-        saccade_type_classifier = load_pickle(saccade_classifier_path)
+        template_matching_results = match_events_ncc(candidate_waveforms[:,:,0], template, ncc_thresh=template_similarity_threshold, amp_thresh=ptp_threshold)
+        n_saccades = (np.abs(template_matching_results['ncc']) >= template_similarity_threshold).sum()
+        saccades_pos = np.where((template_matching_results['ncc'] >= template_similarity_threshold) & (template_matching_results['ptp'] >= ptp_threshold))[0]
+        saccades_neg = np.where((template_matching_results['ncc'] <= -template_similarity_threshold) & (template_matching_results['ptp'] >= ptp_threshold))[0]
+        
+        predicted_labels = np.zeros(n_saccades)
+        predicted_labels[:saccades_pos.size] = -1
+        predicted_labels[saccades_pos.size:] = 1
+
+        indices = np.concatenate([saccades_pos, saccades_neg])
+        label_order = np.argsort(indices)
+
+        sacacde_indices = indices[label_order]   
+        saccade_labels = predicted_labels[label_order]
+
+        saccade_duration_regressor = params["saccade_duration_regressor"]
         onset_offset_regressor = load_pickle(saccade_duration_regressor)
 
-        horizontal_velocity = np.diff(candidate_waveforms[:,:,0], axis=1) ## TODO -- is this horizontal only?
-        #normalized_velocity = horizontal_velocity / np.abs(horizontal_velocity).max(axis=1).reshape(-1, 1)
+        horizontal_velocity = np.diff(candidate_waveforms[sacacde_indices,:,0], axis=1) ## TODO -- is this horizontal only?
         row_max = np.max(np.abs(horizontal_velocity), axis=1, keepdims=True)
         normalized_velocity = horizontal_velocity / row_max
-
-        logger.debug(f"norm_vel_shape: {normalized_velocity.shape}")
-
-        #normalized_velocity = gaussian_filter1d(normalized_velocity, sigma=0.11, axis=0)
-
-        #logger.debug()
-
-        logger.debug(normalized_velocity.max())
-
-        predicted_labels = saccade_type_classifier.predict(normalized_velocity)
         predicted_epochs = onset_offset_regressor.predict(normalized_velocity)
 
-        # predicted_epochs_frames = np.full(predicted_epochs_time.shape, np.nan)
-        # predicted_epochs_frames[:,0] = np.interp(predicted_epochs_time[:,0], )
+        logger.debug('debug')
+        logger.debug(candidate_saccade_indices.shape)
+        logger.debug(predicted_epochs.shape)
+        logger.debug(timepoints.shape)
+        logger.debug(sacacde_indices)
 
-        real = np.where(predicted_labels != 0)[0]
-
-        absolute_epochs = get_absolute_saccade_epochs(candidate_saccade_indices[real], predicted_epochs[real], timepoints[real])
+        absolute_epochs = get_absolute_saccade_epochs(candidate_saccade_indices[sacacde_indices], predicted_epochs, timepoints[sacacde_indices])
         absolute_indices = get_frames_from_timestamps(absolute_epochs, frametimestamps)
 
-        logger.debug(f"Real saccade indices: {real} (n={real.shape[0]})")
-        logger.debug(predicted_labels)
+        #logger.debug(f"Real saccade indices: {real} (n={real.shape[0]})")
+        logger.debug(saccade_labels)
 
-        res[f"saccades/predicted/{side}/labels"] = predicted_labels[real]
-        res[f"saccades/predicted/{side}/timestamps"] = absolute_epochs
-        res[f"saccades/predicted/{side}/indices"] = absolute_indices
-        res[f"saccades/predicted/{side}/epochs"] = predicted_epochs[real]
-        res[f"saccades/predicted/{side}/waveforms"] = candidate_waveforms[real]
+        res[f"saccades/template_matching/{side}/labels"] = saccade_labels
+        res[f"saccades/template_matching/{side}/timestamps"] = absolute_epochs
+        res[f"saccades/template_matching/{side}/indices"] = absolute_indices
+        res[f"saccades/template_matching/{side}/epochs"] = predicted_epochs
+        res[f"saccades/template_matching/{side}/waveforms"] = candidate_waveforms[sacacde_indices]
 
     return res
 
@@ -158,6 +167,83 @@ def extract_and_resample_waveforms(pupil_pos, candidate_saccade_indices, frameti
         
     return resampled_waveforms, resampled_timepoints
 
+
+def match_events_ncc(
+    X,
+    template,
+    *,
+    smooth=None,
+    ncc_thresh=0.85,
+    amp_mode="ptp",          # "ptp", "soft", "joint", or None
+    amp_thresh=None,
+    alpha=0.5,
+    eps=1e-8,
+):
+    X = np.asarray(X)
+    t = np.asarray(template)
+    n, m = X.shape
+    k = len(t)
+
+    # ---- Optional smoothing ----
+    if smooth is not None:
+        w = smooth["window"]
+        p = smooth["poly"]
+        X = savgol_filter(X, w, p, axis=1)
+        t = savgol_filter(t, w, p)
+
+    # ---- Sliding windows ----
+    windows = sliding_window_view(X, k, axis=1)
+
+    # ---- Zero-mean NCC ----
+    t0 = t - t.mean()
+    t_norm = np.linalg.norm(t0) + eps
+
+    w0 = windows - windows.mean(axis=-1, keepdims=True)
+    w_norm = np.linalg.norm(w0, axis=-1)
+
+    ncc = np.einsum("nij,j->ni", w0, t0)
+    ncc /= (w_norm * t_norm + eps)
+
+    # ---- Event-wise best match ----
+    best_idx = np.nanargmax(ncc, axis=1)
+    best_ncc = ncc[np.arange(n), best_idx]
+
+    # ---- Event-wise amplitude metrics ----
+    best_win = windows[np.arange(n), best_idx]
+
+    ptp = np.ptp(best_win, axis=1)
+    rms = np.linalg.norm(best_win, axis=1) / np.sqrt(k)
+
+    # ---- Shape-only mask ----
+    ncc_mask = best_ncc > ncc_thresh
+
+    # ---- Amplitude filtering ----
+    filter_mask = ncc_mask.copy()
+
+    if amp_mode == "ptp":
+        if amp_thresh is None:
+            amp_thresh = np.median(ptp)
+        filter_mask &= ptp > amp_thresh
+
+    if amp_thresh is None:
+        amp_thresh = 0.3 * np.median(w_norm)
+    filter_mask &= w_norm[np.arange(n), best_idx] > amp_thresh
+
+    energy = rms / np.median(rms)
+    score = best_ncc * energy**alpha
+    filter_mask &= score > ncc_thresh
+
+    return {
+        "ncc": ncc.squeeze(),
+        "ncc_mask": ncc_mask,
+        "filter_mask": filter_mask,
+        "best_idx": best_idx,
+        "ptp": ptp.squeeze(),
+        "rms": rms,
+        "amp": w_norm,
+        'energy': energy,
+        "best_ncc": best_ncc,
+    }
 
 # def run(pupil_nt_pose, candidate_saccade_indices, saccade_classifier_path, saccade_duration_regressor, window_size_samples):
 #     ## 1. Extract candidate waveforms

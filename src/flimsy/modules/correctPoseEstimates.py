@@ -1,9 +1,9 @@
 import logging
 
 import numpy as np
-from scipy.ndimage import gaussian_filter1d
 
 from flimsy.pipeline.basemodule import *
+from flimsy.utils.saccades import mask_low_confidence_samples, identify_dropped_frames, insert_frames, interpolate_gaps, smooth_signal
 
 logger = logging.getLogger(__name__)
 
@@ -65,11 +65,11 @@ def run(data, params):
     res = {}
     for side in ["left", "right"]: ## TODO -- this is not robust at all
         logger.debug(side)
-        pupil_pose = data["pose/uncorrected/left/pupil"]
-        nasal_pose = data["pose/uncorrected/left/nasal"]
-        temporal_pose = data["pose/uncorrected/left/temporal"]
-        dorsal_pose = data["pose/uncorrected/left/dorsal"]
-        ventral_pose = data["pose/uncorrected/left/ventral"]
+        pupil_pose = data[f"pose/uncorrected/{side}/pupil"]
+        nasal_pose = data[f"pose/uncorrected/{side}/nasal"]
+        temporal_pose = data[f"pose/uncorrected/{side}/temporal"]
+        dorsal_pose = data[f"pose/uncorrected/{side}/dorsal"]
+        ventral_pose = data[f"pose/uncorrected/{side}/ventral"]
 
         frame_intervals = data[f"frames/{side}/intervals"]
 
@@ -96,12 +96,7 @@ def run(data, params):
 
     return res
 
-def mask_low_confidence_samples(pose, threshold=1.0):
-    confidence = pose[:,2]
-    confidence_mask = confidence < threshold
-    pose[confidence_mask, 0] = np.nan
-    pose[confidence_mask, 1] = np.nan
-    return pose
+
 
 # def rotate_and_center():
 #     ## TODO -- understand the math better. maybe be able to avoid mean subtraction if we use single origin
@@ -211,62 +206,6 @@ def compute_pupil_projections(
 
     return proj ## TODO -- return nasal-temporal and dorsal-ventral projections separately
 
-def identify_dropped_frames(interframe_intervals, nframes, framerate, threshold):
-    if len(interframe_intervals) != nframes:
-        logger.warning(f'Different number of frames ({nframes}) and timestamps ({len(interframe_intervals)})')
-
-    expected_interval = 1e9 / framerate ## 1e9 = nanoseconds
-    ratio = interframe_intervals/expected_interval
-    dropped_indices = np.where(ratio > threshold)[0]
-
-    to_insert = []
-    for index in dropped_indices:
-        n_dropped_frames = int(np.round(ratio[index], 0) - 1)
-
-        logger.debug(index)
-        logger.debug(index+n_dropped_frames)
-        logger.debug(ratio[index])
-
-        to_insert.extend(list(range(index, index+n_dropped_frames)))
-
-    logger.warning(f'dropped_indices: {dropped_indices}')
-    logger.debug(f'to_insert: {to_insert}')
-    return dropped_indices, to_insert
-
-# TODO -- intervals have sub_ms jitter (+-0.001 ms), consistently 0.0003 ms higher than theoretical perfect
-def insert_frames(projections, to_insert):
-    logger.debug(projections.shape)
-    logger.debug(type(projections))
-    logger.debug(to_insert)
-
-    value = np.nan
-    corrected = np.insert(projections, to_insert, value, axis=0)
-
-    return corrected
-
-def smooth_signal(signal, window_size):
-    sigma = np.round(window_size, 2)
-    logger.debug(f"sigma: {sigma}, window_size: {window_size}")
-    return gaussian_filter1d(signal, sigma=sigma, axis=0)
-
-def interpolate_gaps(pose):
-    n_samples, n_columns = pose.shape
-    interpolated = np.copy(pose)
-    for column_index in range(n_columns):
-        values = pose[:,column_index]
-        indices_to_interp = np.where(np.isnan(values))[0]
-        indices = np.arange(0, n_samples)
-        ## NOTE: x is target indices to interp, xp and fp are real data to interp from
-        logger.debug(indices_to_interp)
-        logger.debug(indices.shape)
-        logger.debug(values.shape)
-        
-        interpolated_values = np.interp(x=indices_to_interp, xp=indices[~indices_to_interp], fp=values[~indices_to_interp]) 
-        logger.debug(f"to_interp: {indices_to_interp}")
-        logger.debug(f"interp_values: {interpolated_values}")
-        interpolated[indices_to_interp, column_index] = interpolated_values
-    logger.debug(np.isnan(interpolated).sum())
-    return interpolated
 
 
 # def run(pose, confidence_threshold, frame_intervals, framerate, framedrop_threshold, normalize=False, center=True, smooth=True):
