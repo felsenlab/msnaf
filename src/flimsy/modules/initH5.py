@@ -18,7 +18,7 @@ def run(basepath, prefix, metadata_pattern):
 
     file = h5py.File(os.path.join(basepath, prefix, 'results.h5'), "w")
 
-    filepath = find_files_matching_pattern(basepath, metadata_pattern)
+    filepath = find_files_matching_pattern(basepath, metadata_pattern, recursive=True)
     if len(filepath) != 1:
         logger.error(f"Exactly one metdata file is required, got {filepath}")
     session_info = load_yaml(filepath.pop())

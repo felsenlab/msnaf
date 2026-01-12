@@ -26,7 +26,7 @@ def run(data, params):
 
     res = {}
 
-    interval_files = find_files_matching_pattern(basepath, interval_pattern)
+    interval_files = find_files_matching_pattern(basepath, interval_pattern, recursive=True)
     for side in ["left", "right"]:
         for filename in interval_files:
             if side in filename.name:

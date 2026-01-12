@@ -29,7 +29,7 @@ def run(data, params):
 
     file_pattern = params["file_pattern"]
 
-    metadata_files = find_files_matching_pattern(basepath, file_pattern)
+    metadata_files = find_files_matching_pattern(basepath, file_pattern, recursive=True)
     if len(metadata_files) != 1:
         logger.error(f"Got unexpected number of metadata files ({len(metadata_files)}) matching {file_pattern} in {basepath}. {metadata_files}")
 
@@ -65,7 +65,7 @@ def run(data, params):
     res["stimuli/dg/probe/contrast"] = probe_contrast[np.where(event_ids==3)]
     res["stimuli/dg/probe/phase"] = probe_phase[np.where(event_ids==3)]
     res["stimuli/dg/iti/timestamps"] = event_time_in_lj[np.where(event_ids==4)]
-    res["stimuli/dg/cumtime"] = np.cumsum(stimulus_metadata["Timestamp"])
+    res["stimuli/dg/cumtime"] = np.cumsum(stimulus_metadata["Timestamp"].to_numpy())
 
     return res
 

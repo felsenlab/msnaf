@@ -37,6 +37,17 @@ def run(data, params):
         pupil_xy = data[f"pose/corrected/{side}/pupil"]
 
         R, nt_hat, ul_hat = compute_rotation_matrix(nasal_xy, temporal_xy, dorsal_xy, ventral_xy, flip_vertical=flip_dv_axis)
+
+        if np.any(np.isnan(R)):
+            logger.error(f"CATASTROPHIC ERROR COMPUTING ROTATION: NaNs introduced")
+            logger.error(f"Rotation matrix: {R}")
+            logger.error(f"nasal nans: {np.sum(np.isnan(nasal_xy))}")
+            logger.error(f"temporal nans: {np.sum(np.isnan(temporal_xy))}")
+            logger.error(f"dorsal nans: {np.sum(np.isnan(dorsal_xy))}")
+            logger.error(f"ventral nans: {np.sum(np.isnan(ventral_xy))}")
+            logger.error(f"nt_vector: {nt_hat}")
+            logger.error(f"ul_vector: {ul_hat}")
+
         rotated_pupil = rotate_points(pupil_xy, R)
         res[f"pose/rotated/{side}/pupil"] = rotated_pupil
         logger.warning(rotated_pupil.shape)

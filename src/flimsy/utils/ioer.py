@@ -99,7 +99,7 @@ def load_datasets(h5file, fieldnames):
 
 def save_to_h5(h5file, data: Dict):
     for field_name, field_data in data.items():
-        logger.error(type(field_data))
+        #logger.error(type(field_data))
         logger.debug(f"Saving {field_name}")
         #h5file.create_dataset(field_name)
         write_obj(h5file, field_name, field_data)

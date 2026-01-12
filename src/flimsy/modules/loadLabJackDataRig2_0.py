@@ -18,9 +18,9 @@ def run(data, params):
     file_pattern = params["file_pattern"]
     channel_map = params["channel_map"]
 
-    filepath = find_files_matching_pattern(basepath, file_pattern)
+    filepath = find_files_matching_pattern(basepath, file_pattern, recursive=True)
     if len(filepath) != 1:
-        logger.error("There must be exactly 1 labjack data file matching pattern")
+        logger.error(f"There must be exactly 1 labjack data file matching pattern. Found {len(filepath)} files matching {file_pattern} in {basepath}")
     labjack_data = pd.read_csv(filepath.pop())
     print(labjack_data.columns)
 

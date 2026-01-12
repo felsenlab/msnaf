@@ -72,10 +72,15 @@ def run(data, params):
 
         dropped_frames, frames_to_insert = identify_dropped_frames(frame_intervals, len(masked_pupil_pose), framerate, framedrop_threshold)
         
+        logger.debug(f"{side} Pupil")
         indexcorrected_pupil_pose = insert_frames(masked_pupil_pose, frames_to_insert)
+        logger.debug(f"{side} Nasal")
         indexcorrected_nasal_pose = insert_frames(masked_nasal_pose, frames_to_insert)
+        logger.debug(f"{side} Temporal")
         indexcorrected_temporal_pose = insert_frames(masked_temporal_pose, frames_to_insert)
+        logger.debug(f"{side} Dorsal")
         indexcorrected_dorsal_pose = insert_frames(masked_dorsal_pose, frames_to_insert)
+        logger.debug(f"{side} Ventral")
         indexcorrected_ventral_pose = insert_frames(masked_ventral_pose, frames_to_insert)
         
         imputed_pose_pupil = interpolate_gaps(indexcorrected_pupil_pose)
