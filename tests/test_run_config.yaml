@@ -1,7 +1,9 @@
 initH5:
   basepath:
-    - /media/schollab-dion/Seagate Portable Drive/muscbackup/20251224/unitME/session001/
+    #- /media/schollab-dion/Seagate Portable Drive/muscbackup/20251224/unitME/session001/
     #- /media/schollab-dion/Seagate Portable Drive/muscbackup/20251224/unitME/session004/
     #- /media/schollab-dion/Seagate Portable Drive/muscbackup/20251226/unitME/session003/
     #- /media/schollab-dion/Seagate Portable Drive/muscbackup/20251226/unitME/session004/
-    #- /home/nick/asdf/felsenlab/session007/
+    - /home/nick/asdf/felsenlab/session003/
+    - /home/nick/asdf/felsenlab/session005/
+    - /home/nick/asdf/felsenlab/session007/

@@ -66,3 +66,94 @@ def smooth_signal(signal, window_size, method='gaussian'):
         smooth = median_filter(signal, size=window_size)
         
     return smooth
+
+
+def compute_template_match_scores(
+    events,
+    template,
+    *,
+    eps=1e-8,
+):
+    """
+    Center-restricted sigmoid scoring.
+
+    Parameters
+    ----------
+    X : (n_events, window_size)
+        Event-wise signals with centered inflection
+    template : (k,)
+        Centered sigmoid template
+
+    Returns
+    -------
+    scores : dict of arrays, each shape (n_events,)
+    """
+
+    X = np.asarray(events)
+    t = np.asarray(template)
+
+    n, m = X.shape
+    k = len(t)
+
+    if k > m:
+        raise ValueError("template longer than event window")
+
+    # ---- Extract centered window ----
+    start = (m - k) // 2
+    stop = start + k
+    W = X[:, start:stop]           # (n, k)
+
+    # ---- Peak-to-peak amplitude ----
+    ptp = np.ptp(W[:,:], axis=1) #was 20:30
+
+    # ============================================================
+    # NCC (zero-mean, scale-invariant)
+    # ============================================================
+    t0 = t - t.mean()
+    t_norm = np.linalg.norm(t0) + eps
+
+    W0 = W - W.mean(axis=1, keepdims=True)
+    W_norm = np.linalg.norm(W0, axis=1) + eps
+
+    ncc = np.einsum("ij,j->i", W0, t0) / (W_norm * t_norm)
+
+    # ============================================================
+    # Gradient-based structure
+    # ============================================================
+    dW = np.gradient(W, axis=1)
+    dt = np.gradient(t)
+
+    # ---- Gradient matching score ----
+    dt0 = dt - dt.mean()
+    dt_norm = np.linalg.norm(dt0) + eps
+
+    dW0 = dW - dW.mean(axis=1, keepdims=True)
+    dW_norm = np.linalg.norm(dW0, axis=1) + eps
+
+    gradient_score = np.einsum("ij,j->i", dW0, dt0) / (dW_norm * dt_norm)
+
+    # ---- Monotonicity score ----
+    monotonicity_score = np.mean(dW > 0, axis=1)
+
+    # ---- Symmetry score (derivative symmetry about center) ----
+    mid = k // 2
+    left = dW[:, :mid]
+    right = dW[:, mid + 1:][:, ::-1]
+
+    L = min(left.shape[1], right.shape[1])
+    left = left[:, -L:]
+    right = right[:, :L]
+
+    num = np.sum((left - right) ** 2, axis=1)
+    den = np.sum(left ** 2 + right ** 2, axis=1) + eps
+
+    symmetry_score = 1.0 - num / den
+    symmetry_score = np.clip(symmetry_score, 0.0, 1.0)
+
+    return {
+        "ncc": ncc,
+        "ptp": ptp,
+        "gradient_score": gradient_score,
+        "monotonicity_score": monotonicity_score,
+        "symmetry_score": symmetry_score,
+    }

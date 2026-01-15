@@ -1,5 +1,7 @@
 import numpy as np
 
+from scipy.ndimage import median_filter
+
 from flimsy.pipeline.basemodule import *
 from flimsy.utils.saccades import smooth_signal
 
@@ -7,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 @module(name="rotatePose", description="Rotates pose estimates so that nasal-temporal axis is horizontal and dosal-ventral axis is vertical")
 @param('flip_dv_axis', default=True, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
-@param('smoothing_strength', default=1, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
+@param('smoothing_strength', default=0.05, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
 
 @requires("pose/corrected/left/nasal")
 @requires("pose/corrected/left/pupil")
@@ -56,7 +58,7 @@ def run(data, params):
         # smoothed[:,0] = medfilt(smoothed[:,0], kernel_size=3)
         # smoothed[:,1] = medfilt(smoothed[:,1], kernel_size=3)
 
-        res[f"pose/smoothed/{side}"] = smooth_signal(rotated_pupil, smoothing_strength, method='gaussian')  #(3,1), method='median'    np.round(150*0.003, 2), method='gaussian'
+        res[f"pose/smoothed/{side}"] = smooth_signal(median_filter(rotated_pupil, size=(9,1), mode='nearest'), smoothing_strength, method='gaussian')  #(3,1), method='median'    np.round(150*0.003, 2), method='gaussian'
         res[f"pose/rotation/{side}/nt_vector"] = nt_hat
         res[f"pose/rotation/{side}/dv_vector"] = ul_hat
         res[f"pose/rotation/{side}/matrix"] = R

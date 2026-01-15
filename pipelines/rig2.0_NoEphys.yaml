@@ -13,7 +13,7 @@ timestampCameraFrames:
 #- loadStimulusMetadataRig2.0: ## WIP pending feedback
 analyzeVideoWithDLC:
   video_pattern: "*Cam*.mp4"
-  dlc_path: "/home/schollab-dion/DeepLabCut/sacnet-josh-2025-01-29/config.yaml" 
+  dlc_path: "/home/nick/asdf/felsenlab/sacnet-josh-2025-01-29/config.yaml" 
 loadPoseEstimates:
   file_pattern: "*DLC*.h5"
 # correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
@@ -33,15 +33,21 @@ rotatePose:
   flip_dv_axis: True
 
 identifyCandidateSaccades:
-  velocity_threshold_percentile: 95
-  distance_threshold_samples: 10.5
+  velocity_threshold_percentile: 98
+  distance_threshold_samples: 15.5
 classifyCandidateSaccades: 
-  saccade_classifier_path: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/classifier.pkl
-  saccade_duration_regressor: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+  saccade_classifier_path: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/classifier.pkl
+  saccade_duration_regressor: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
   window_size_time: 0.2
-classifyCandidateSaccadesTemplateMatching: 
-  saccade_duration_regressor: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
-  template: /home/schollab-dion/Code/msnaf/models/saccade_template.npy
+# classifyCandidateSaccadesTemplateMatching: 
+#   saccade_duration_regressor: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+#   template: /home/schollab-dion/Code/msnaf/models/saccade_template.npy
+#   window_size_time: 0.2
+
+classifyCandidateSaccadesTemplateMatchingWithClassifier: 
+  # saccade_classifier_path: /home/nick/asdf/repos/flimsy/models/lr_saccade_classifier_v02.pkl
+  saccade_duration_regressor: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+  template: /home/nick/asdf/repos/flimsy/models/saccade_template.npy
   window_size_time: 0.2
 
 timestampStimulusWithCameraRig2_0:

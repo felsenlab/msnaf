@@ -5,7 +5,6 @@ __pycache__/
 
 logs/
 
-pipelines/rig2.0_NoEphys.yaml
 tests/
 
 TODO.md

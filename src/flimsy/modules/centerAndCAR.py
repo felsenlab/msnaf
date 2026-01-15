@@ -71,8 +71,8 @@ def run(data, params):
 
         res[f"pose/centered/{side}/nasal"] = centered_nasal_xy
         res[f"pose/centered/{side}/temporal"] = centered_temporal_xy
-        res[f"pose/centered/{side}/dorsal"] = centered_ventral_xy
-        res[f"pose/centered/{side}/ventral"] = centered_dorsal_xy
+        res[f"pose/centered/{side}/dorsal"] = centered_dorsal_xy
+        res[f"pose/centered/{side}/ventral"] = centered_ventral_xy
         res[f"pose/centered/{side}/pupil"] = centered_pupil_xy
 
         res[f"pose/corrected/{side}/nasal"] = nasal_xy - car
