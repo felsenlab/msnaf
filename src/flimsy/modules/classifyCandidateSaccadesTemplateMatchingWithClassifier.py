@@ -41,7 +41,7 @@ def run(data, params):
     frametimestamps = data["labjack/cameras/timestamps"]
     template = np.load(params["template"])
 
-    saccade_classifier_path = params["saccade_classifier_path"]
+    #saccade_classifier_path = params["saccade_classifier_path"]
     saccade_duration_regressor = params["saccade_duration_regressor"]
 
     #saccade_type_classifier = load_pickle(saccade_classifier_path)

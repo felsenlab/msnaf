@@ -23,6 +23,19 @@ logger = logging.getLogger(__name__)
 @requires("pose/corrected/right/ventral")
 @requires("pose/corrected/right/dorsal")
 
+# @requires("pose/centered/left/nasal")
+# @requires("pose/centered/left/pupil")
+# @requires("pose/centered/left/temporal")
+# @requires("pose/centered/left/ventral")
+# @requires("pose/centered/left/dorsal")
+
+# @requires("pose/centered/right/nasal")
+# @requires("pose/centered/right/pupil")
+# @requires("pose/centered/right/temporal")
+# @requires("pose/centered/right/ventral")
+# @requires("pose/centered/right/dorsal")
+
+
 @produces("pose/rotated/left/pupil")
 @produces("pose/rotated/right/pupil")
 
