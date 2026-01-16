@@ -44,7 +44,7 @@ classifyCandidateSaccades:
 #   template: /home/schollab-dion/Code/msnaf/models/saccade_template.npy
 #   window_size_time: 0.2
 
-classifyCandidateSaccadesTemplateMatchingWithClassifier: 
+classifyCandidateSaccadesExperimental: 
   # saccade_classifier_path: /home/nick/asdf/repos/flimsy/models/lr_saccade_classifier_v02.pkl
   saccade_duration_regressor: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
   template: /home/nick/asdf/repos/flimsy/models/saccade_template.npy

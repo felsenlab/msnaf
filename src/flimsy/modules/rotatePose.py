@@ -71,7 +71,7 @@ def run(data, params):
         # smoothed[:,0] = medfilt(smoothed[:,0], kernel_size=3)
         # smoothed[:,1] = medfilt(smoothed[:,1], kernel_size=3)
 
-        res[f"pose/smoothed/{side}"] = smooth_signal(median_filter(rotated_pupil, size=(9,1), mode='nearest'), smoothing_strength, method='gaussian')  #(3,1), method='median'    np.round(150*0.003, 2), method='gaussian'
+        res[f"pose/smoothed/{side}"] = smooth_signal(rotated_pupil, window_size=5, method="hampelsavgol") #smooth_signal(median_filter(rotated_pupil, size=(9,1), mode='nearest'), smoothing_strength, method='gaussian')  #(3,1), method='median'    np.round(150*0.003, 2), method='gaussian'
         res[f"pose/rotation/{side}/nt_vector"] = nt_hat
         res[f"pose/rotation/{side}/dv_vector"] = ul_hat
         res[f"pose/rotation/{side}/matrix"] = R

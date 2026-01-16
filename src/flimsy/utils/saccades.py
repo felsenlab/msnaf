@@ -1,6 +1,9 @@
 import logging
 
 import numpy as np
+import pandas as pd
+from hampel import hampel
+from scipy.signal import savgol_filter
 from scipy.ndimage import gaussian_filter1d, median_filter
 
 
@@ -58,15 +61,20 @@ def insert_frames(projections, to_insert):
 
     return corrected
 
-def smooth_signal(signal, window_size, method='gaussian'):
+def smooth_signal(signal, window_size, method='gaussian', n_sigma=3.0):
     if method == 'gaussian':
         #logger.debug(f"sigma: {sigma}, window_size: {window_size}")
         smooth = gaussian_filter1d(signal, sigma=window_size, axis=0)
     elif method == 'median':
         smooth = median_filter(signal, size=window_size)
+    elif method == "hampelsavgol":
+        smooth = np.full(signal.shape, np.nan)
+        for i_col in range(signal.shape[1]):
+            smooth[:,i_col] = hampel(signal[:,i_col], window_size=window_size, n_sigma=n_sigma).filtered_data
+        #smooth = median_filter(signal, size=(3,1))
+        smooth = savgol_filter(signal, window_length=11, polyorder=3, axis=0)
         
     return smooth
-
 
 def compute_template_match_scores(
     events,

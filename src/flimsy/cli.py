@@ -66,7 +66,7 @@ def main():
     t2 = time()
     
     logger.info(pretty_print(summary))
-    logger.info(f'Execution completed (runtime={t2-t1})')
+    logger.info(f'Execution completed (runtime={t2-t1:.3f})')
 
 if __name__ == "__main__":
     main()
