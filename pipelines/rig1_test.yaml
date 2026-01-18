@@ -1,7 +1,7 @@
 initH5:
   metadata_pattern: "metadata.txt"
 loadLabJackDataRig2.0: 
-    file_pattern: "labjack*csv"
+    file_pattern: "*labjack*csv"
     channel_map:
       AIN1: "stimulus"
       FIO6: "camera"
@@ -13,7 +13,7 @@ timestampCameraFrames:
 #- loadStimulusMetadataRig2.0: ## WIP pending feedback
 analyzeVideoWithDLC:
   video_pattern: "*Cam*.mp4"
-  dlc_path: "/home/schollab-dion/Documents/DeepLabCut/sacnet-josh-2025-01-29/config.yaml" 
+  dlc_path: "/home/schollab-dion/Projects/sacnet-josh-2025-01-29/config.yaml" 
 loadPoseEstimates:
   file_pattern: "*DLC*.h5"
 # correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
@@ -45,9 +45,10 @@ classifyCandidateSaccades:
 #   window_size_time: 0.2
 
 classifyCandidateSaccadesExperimental: 
+  # saccade_classifier_path: /home/nick/asdf/repos/flimsy/models/lr_saccade_classifier_v02.pkl
   saccade_duration_regressor: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
-  template: /home/schollab-dion/Code/msnaf/models/saccade_template.npy
+  template: /home/schollab-dion/Code/flimsy/models/saccade_template.npy
   window_size_time: 0.2
 
-timestampStimulusWithCameraRig2_0:
-  file_pattern: "*Grating*[0-9].csv"
+#timestampStimulusWithCameraRig2_0:
+#  file_pattern: "*Grating*[0-9].csv"
