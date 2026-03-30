@@ -1,0 +1,113 @@
+initH5:
+  metadata_pattern: "metadata.txt"
+loadLabJackDataRig1.0: 
+  file_pattern: "data_*.dat"
+  channel_map:
+    Time: "timestamps"
+    v0: "v0"
+    v1: "v1"
+    v2: "v2"
+    v3: "v3"
+    v4: "v4"
+    v5: "v5"
+    v6: "camera"
+    y0: "y0"
+    y1: "y1"
+    y2: "y2"
+    y3: "y3"
+    y4: "y4"
+    y5: "y5"
+    y6: "stimulus"
+  output_filename: 'consolidated_labjack.csv'
+  fieldnames:
+    channel: ["timestamps", "v0", "v1", "v2", "v3", "v4", "v5", "camera", "y0", "y1", "y2", "y3", "y4", "y5", "stimulus"]
+timestampCameraFrames:
+  sampling_rate: 2000
+  interval_pattern: "*Cam_timestamps.txt"
+  fieldnames:
+    side: ['right']
+
+#- loadStimulusMetadataRig2.0: ## WIP pending feedback
+analyzeVideoWithDLC:
+  video_pattern: "*Cam*.mp4"
+  dlc_path: "/home/nick/asdf/felsenlab/sacnet-josh-2025-01-29/config.yaml" 
+
+loadPoseEstimates:
+  file_pattern: "*DLC*.h5"
+  fieldnames:
+    side: ['right']
+    bodypart: ['nasal', 'temporal', 'dorsal', 'ventral', 'pupil']
+# correctPoseEstimates: ## TODO -- either separate this or it's going to return a BIG dict
+#   smooth: True
+#   center: True
+#   normalize: False
+#   framerate: 150 ## TODO -- might be able to get from metadata file
+#   framedrop_threshold: 1.5
+#   confidence_threshold: 1.0
+interpolateMissingPose:
+  framerate: 150
+  framedrop_threshold: 1.5
+  confidence_threshold: 0.999
+  fieldnames:
+    side: ['right']
+    bodypart: ['nasal', 'temporal', 'dorsal', 'ventral', 'pupil']
+    stage: ['masked', 'interpolated']
+centerAndCAR:
+  filter_landmarks: False
+  fieldnames:
+    side: ['right']
+    bodypart: ['nasal', 'temporal', 'dorsal', 'ventral', 'pupil']
+    stage: ['centered', 'corrected']
+rotatePose:
+  flip_dv_axis: True
+  fieldnames:
+    side: ['right']
+    bodypart: ['nasal', 'temporal', 'dorsal', 'ventral', 'pupil']
+
+identifyCandidateSaccades:
+  velocity_threshold_percentile: 98
+  distance_threshold_samples: 15.5
+  fieldnames:
+    side: ['right']
+classifyCandidateSaccades: 
+  saccade_classifier_path: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/classifier.pkl
+  saccade_duration_regressor: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+  window_size_time: 0.2
+  fieldnames:
+    side: ['right']
+# classifyCandidateSaccadesTemplateMatching: 
+#   saccade_duration_regressor: /home/schollab-dion/Projects/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+#   template: /home/schollab-dion/Code/msnaf/models/saccade_template.npy
+#   window_size_time: 0.2
+
+classifyCandidateSaccadesExperimental: 
+  saccade_duration_regressor: /home/nick/asdf/felsenlab/sacnet3/models/2025-03-14_21:45:17/regressor.pkl
+  template: /home/nick/asdf/repos/flimsy/models/saccade_template.npy
+  window_size_time: 0.2
+  fieldnames:
+    side: ['right']
+
+parseDriftingGratingMetadata:
+  #stimulus_channel: #, description="H5 field containing the raw stimulus TTL signal, e.g. labjack/stimulus/raw")
+  #median_filter_size: #", default=5, description="Kernel size for median filter used to clean the TTL signal. Must be odd.")
+  #inter_block_interval_threshold: #", default=16000, description="Minimum inter-pulse gap in samples that separates stimulus blocks")
+  #timing_mismatch_threshold: #", default=0.1, description="Inter-event timing difference in seconds above which a pulse is considered missing")
+  #metadata_dir: #", default="videos", description="Subdirectory of basepath containing the metadata files")
+  #file_pattern: #", default="driftingGratingMetadata-*.txt", description="Glob pattern for discovering metadata files. Files are sorted in natural order.")
+  #n_header_lines: #", default=5, description="Number of non-CSV header lines at the top of each metadata file")
+  header_fields:
+    event_id: 0
+    motion_direction: 1
+    probe_contrast: 2
+    probe_phase: 3
+    timestamp: 4
+  column_map:
+    event_id: 0
+    motion_direction: 1
+    probe_contrast: 2
+    probe_phase: 3
+    timestamp: 4
+
+
+# timestampStimulusWithCameraRig2_0:
+#   file_pattern: "*Grating*[0-9].csv"

@@ -13,17 +13,21 @@ logger = logging.getLogger(__name__)
 #@produces(group="pose/raw", type="dynamic")
 #@param("headerrows", default=[0,1,2], optional=True)
 
-@produces("pose/uncorrected/left/nasal")
-@produces("pose/uncorrected/left/pupil")
-@produces("pose/uncorrected/left/temporal")
-@produces("pose/uncorrected/left/ventral")
-@produces("pose/uncorrected/left/dorsal")
+@produces("pose/uncorrected/{side}/{bodypart}")
 
-@produces("pose/uncorrected/right/nasal")
-@produces("pose/uncorrected/right/pupil")
-@produces("pose/uncorrected/right/temporal")
-@produces("pose/uncorrected/right/ventral")
-@produces("pose/uncorrected/right/dorsal")
+@param("fieldnames")
+
+# @produces("pose/uncorrected/left/nasal")
+# @produces("pose/uncorrected/left/pupil")
+# @produces("pose/uncorrected/left/temporal")
+# @produces("pose/uncorrected/left/ventral")
+# @produces("pose/uncorrected/left/dorsal")
+
+# @produces("pose/uncorrected/right/nasal")
+# @produces("pose/uncorrected/right/pupil")
+# @produces("pose/uncorrected/right/temporal")
+# @produces("pose/uncorrected/right/ventral")
+# @produces("pose/uncorrected/right/dorsal")
 
 #def run(base_path, file_pattern, headerrows):
 def run(data, params):

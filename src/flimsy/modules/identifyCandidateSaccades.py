@@ -8,10 +8,16 @@ from flimsy.pipeline.basemodule import *
 logger = logging.getLogger(__name__)
 
 @module(name='identifyCandidateSaccades')
-@requires("pose/smoothed/left")
-@requires("pose/smoothed/right")
-@produces("saccades/putative/left/indices")
-@produces("saccades/putative/right/indices")
+# @requires("pose/smoothed/left")
+# @requires("pose/smoothed/right")
+# @produces("saccades/putative/left/indices")
+# @produces("saccades/putative/right/indices")
+
+@requires("pose/smoothed/{side}")
+@produces("saccades/putative/{side}/indices")
+
+@param("fieldnames")
+
 @param("velocity_threshold_percentile", description="Velocity percentile to be considered a candidate saccade in pixels/s. Default is 95th percentile", default=95)
 @param("distance_threshold_samples", description="Minimum number of samples between peaks. Can be calculated using <time in seconds> * <camera_fps>. Default is 0.07s * 150fps = 10.5 samples", default=10.5)
 def run(data, params):
@@ -25,7 +31,7 @@ def run(data, params):
     distance_threshold_samples = params["distance_threshold_samples"]
 
     res = {}
-    for side in ["left", "right"]:
+    for side in params["fieldnames"]["side"]:
         pupil_nt = data[f"pose/smoothed/{side}"]
         logger.debug(f"pose:shape - {pupil_nt[:,0].shape}")
         horizontal_velocity = np.diff(pupil_nt[:,0])

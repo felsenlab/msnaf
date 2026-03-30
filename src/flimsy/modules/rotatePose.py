@@ -8,20 +8,25 @@ from flimsy.utils.saccades import smooth_signal
 logger = logging.getLogger(__name__)
 
 @module(name="rotatePose", description="Rotates pose estimates so that nasal-temporal axis is horizontal and dosal-ventral axis is vertical")
-@param('flip_dv_axis', default=True, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
-@param('smoothing_strength', default=0.05, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
+@param("flip_dv_axis", default=True, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
+@param("smoothing_strength", default=0.05, description="Boolean representing whether or not to flip the dorsal-ventral axis to correct for camera being upside down")
 
-@requires("pose/corrected/left/nasal")
-@requires("pose/corrected/left/pupil")
-@requires("pose/corrected/left/temporal")
-@requires("pose/corrected/left/ventral")
-@requires("pose/corrected/left/dorsal")
+# @requires("pose/corrected/left/nasal")
+# @requires("pose/corrected/left/pupil")
+# @requires("pose/corrected/left/temporal")
+# @requires("pose/corrected/left/ventral")
+# @requires("pose/corrected/left/dorsal")
 
-@requires("pose/corrected/right/nasal")
-@requires("pose/corrected/right/pupil")
-@requires("pose/corrected/right/temporal")
-@requires("pose/corrected/right/ventral")
-@requires("pose/corrected/right/dorsal")
+# @requires("pose/corrected/right/nasal")
+# @requires("pose/corrected/right/pupil")
+# @requires("pose/corrected/right/temporal")
+# @requires("pose/corrected/right/ventral")
+# @requires("pose/corrected/right/dorsal")
+
+@requires("pose/corrected/{side}/{bodypart}")
+@produces("pose/rotated/{side}/pupil")
+
+@param("fieldnames")
 
 # @requires("pose/centered/left/nasal")
 # @requires("pose/centered/left/pupil")
@@ -36,15 +41,15 @@ logger = logging.getLogger(__name__)
 # @requires("pose/centered/right/dorsal")
 
 
-@produces("pose/rotated/left/pupil")
-@produces("pose/rotated/right/pupil")
+# @produces("pose/rotated/left/pupil")
+# @produces("pose/rotated/right/pupil")
 
 def run(data, params):
     flip_dv_axis = params["flip_dv_axis"]
     smoothing_strength = params["smoothing_strength"]
 
     res = {}
-    for side in ["left", "right"]:
+    for side in params["fieldnames"]["side"]:
         nasal_xy = data[f"pose/corrected/{side}/nasal"]
         temporal_xy = data[f"pose/corrected/{side}/temporal"]
         dorsal_xy = data[f"pose/corrected/{side}/dorsal"]

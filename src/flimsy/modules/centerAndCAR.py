@@ -9,52 +9,59 @@ logger = logging.getLogger(__name__)
 
 @param("filter_landmarks", description="Boolean representing whether or not to median filter the landmark position to remove pixel-level jitter. Recommended value is True")
 
-@requires("pose/interpolated/left/nasal")
-@requires("pose/interpolated/left/pupil")
-@requires("pose/interpolated/left/temporal")
-@requires("pose/interpolated/left/ventral")
-@requires("pose/interpolated/left/dorsal")
+# @requires("pose/interpolated/left/nasal")
+# @requires("pose/interpolated/left/pupil")
+# @requires("pose/interpolated/left/temporal")
+# @requires("pose/interpolated/left/ventral")
+# @requires("pose/interpolated/left/dorsal")
 
-@requires("pose/interpolated/right/nasal")
-@requires("pose/interpolated/right/pupil")
-@requires("pose/interpolated/right/temporal")
-@requires("pose/interpolated/right/ventral")
-@requires("pose/interpolated/right/dorsal")
+@requires("pose/interpolated/{side}/{bodypart}")
+
+# @requires("pose/interpolated/right/nasal")
+# @requires("pose/interpolated/right/pupil")
+# @requires("pose/interpolated/right/temporal")
+# @requires("pose/interpolated/right/ventral")
+# @requires("pose/interpolated/right/dorsal")
+
+@produces("pose/centered/{side}/{bodypart}")
+@produces("pose/corrected/{side}/{bodypart}")
+@produces("pose/car/{side}")
+
+@param("fieldnames")
+
+# @produces("pose/centered/left/nasal")
+# @produces("pose/centered/left/pupil")
+# @produces("pose/centered/left/temporal")
+# @produces("pose/centered/left/ventral")
+# @produces("pose/centered/left/dorsal")
+
+# @produces("pose/centered/right/nasal")
+# @produces("pose/centered/right/pupil")
+# @produces("pose/centered/right/temporal")
+# @produces("pose/centered/right/ventral")
+# @produces("pose/centered/right/dorsal")
 
 
-@produces("pose/centered/left/nasal")
-@produces("pose/centered/left/pupil")
-@produces("pose/centered/left/temporal")
-@produces("pose/centered/left/ventral")
-@produces("pose/centered/left/dorsal")
+# @produces("pose/corrected/left/nasal", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/left/pupil", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/left/temporal", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/left/ventral", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/left/dorsal", description="Pose estimate after common average referencing")
 
-@produces("pose/centered/right/nasal")
-@produces("pose/centered/right/pupil")
-@produces("pose/centered/right/temporal")
-@produces("pose/centered/right/ventral")
-@produces("pose/centered/right/dorsal")
+# @produces("pose/corrected/right/nasal", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/right/pupil", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/right/temporal", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/right/ventral", description="Pose estimate after common average referencing")
+# @produces("pose/corrected/right/dorsal", description="Pose estimate after common average referencing")
 
-
-@produces("pose/corrected/left/nasal", description="Pose estimate after common average referencing")
-@produces("pose/corrected/left/pupil", description="Pose estimate after common average referencing")
-@produces("pose/corrected/left/temporal", description="Pose estimate after common average referencing")
-@produces("pose/corrected/left/ventral", description="Pose estimate after common average referencing")
-@produces("pose/corrected/left/dorsal", description="Pose estimate after common average referencing")
-
-@produces("pose/corrected/right/nasal", description="Pose estimate after common average referencing")
-@produces("pose/corrected/right/pupil", description="Pose estimate after common average referencing")
-@produces("pose/corrected/right/temporal", description="Pose estimate after common average referencing")
-@produces("pose/corrected/right/ventral", description="Pose estimate after common average referencing")
-@produces("pose/corrected/right/dorsal", description="Pose estimate after common average referencing")
-
-@produces("pose/car/right", description="Estimated global motion of the eye using the median landmark centroid. NOTE: this is a PRE-ROTATION estimate.")
-@produces("pose/car/left", description="Estimated global motion of the eye using the median landmark centroid. NOTE: this is a PRE-ROTATION estimate.")
+# @produces("pose/car/right", description="Estimated global motion of the eye using the median landmark centroid. NOTE: this is a PRE-ROTATION estimate.")
+# @produces("pose/car/left", description="Estimated global motion of the eye using the median landmark centroid. NOTE: this is a PRE-ROTATION estimate.")
 
 def run(data, params):
     filter_landmarks = params["filter_landmarks"]
 
     res = {}
-    for side in ["left", "right"]:
+    for side in params["fieldnames"]["side"]:
         nasal_xy = data[f"pose/interpolated/{side}/nasal"]
         temporal_xy = data[f"pose/interpolated/{side}/temporal"]
         dorsal_xy = data[f"pose/interpolated/{side}/dorsal"]

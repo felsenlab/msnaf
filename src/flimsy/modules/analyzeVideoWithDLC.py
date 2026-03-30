@@ -21,6 +21,9 @@ def run(data, params):
 
     video_list = find_files_matching_pattern(basepath, video_pattern, recursive=True)
     dlc_list = find_files_matching_pattern(basepath, "*DLC*h5", recursive=True) ## TODO -- implement better skipping logic
+    video_list = [str(videopath) for videopath in video_list]
+
+    logger.error(f"Video path type: {type(video_list[0])}")
 
     if len(dlc_list) > 0:
         logger.warning(f"Found existing DLC output matching pattern '*DLC*h5', skipping analyzing videos")

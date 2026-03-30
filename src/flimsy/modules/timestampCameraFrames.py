@@ -11,11 +11,16 @@ from flimsy.utils.ioer import find_files_matching_pattern
 @requires("labjack/camera/raw")
 @requires("metadata/basepath")
 @produces("labjack/cameras/timestamps", description="Labjack sample where frame events occur")
-@produces("frames/left/intervals", description="")
-@produces("frames/right/intervals", description="")
+@produces("frames/{side}/intervals", description="")
+# @produces("frames/left/intervals", description="")
+# @produces("frames/right/intervals", description="")
 @param("sampling_rate", description="labjack sampling rate")
 @param("interval_pattern")
+@param("fieldnames")
 def run(data, params):
+
+    logger.debug(f"params: {params.keys()}")
+
     camera_signal = data["labjack/camera/raw"]
     sampling_rate = params["sampling_rate"]
 
@@ -27,7 +32,7 @@ def run(data, params):
     res = {}
 
     interval_files = find_files_matching_pattern(basepath, interval_pattern, recursive=True)
-    for side in ["left", "right"]:
+    for side in params["fieldnames"]["side"]:
         for filename in interval_files:
             if side in filename.name:
                 res[f"frames/{side}/intervals"] = pd.read_csv(filename).to_numpy()

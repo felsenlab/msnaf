@@ -9,25 +9,35 @@ from flimsy.utils.ioer import load_pickle
 logger = logging.getLogger(__name__)
 
 @module(name='classifyCandidateSaccades', description="NOTE: Saccade onsets and offsets are aligned to the nearest frame, thus limiting the maximum temporal resolution to 1/fps, or ~7 ms at 150fps.\nNOTE: Classifiers only consider normalize horizontal velocity. They are not sensitive to amplitude, vertical velocity, or any other features")
-@requires("saccades/putative/left/indices")
-@requires("saccades/putative/right/indices")
-@requires("pose/smoothed/left")
-@requires("pose/smoothed/right")
+# @requires("saccades/putative/left/indices")
+# @requires("saccades/putative/right/indices")
+# @requires("pose/smoothed/left")
+# @requires("pose/smoothed/right")
+
+@requires("saccades/putative/{side}/indices")
+@requires("pose/smoothed/{side}")
 @requires("labjack/cameras/timestamps")
+
 #@produces("saccades/predicted/{side}/labels", description="Classification for each candidate waveform. Labels are 1, 0, or 1 for n/t, noise, or n/t respectively.")
 #@produces("saccades/predicted/{side}/epochs", description="Frame index of saccade onsets for each candidate waveform") ## TODO -- maybe exclude noise events?
 #@produces("saccade_offset", description="Frame index of saccade offsets for each candidate waveform") ## TODO -- maybe exclude noise events?
+
 @param("window_size_samples", description="Number of samples to extract on each side of a candidate event in samples. Can be calculated using <time in seconds> * <camera_fps>. The default is 30, for 71 total samples", default=26)
 @param("window_size_time", default=0.2, description="Time to extract on each side of a candidate event. Default is 0.2, units unknown")
 @param("n_samples", default=51, description="Number of points to use for resampling candidate waveforms")
 @param("saccade_classifier_path", description="")
 @param("saccade_duration_regressor", description="")
 
-@produces("saccades/predicted/left/labels")
-@produces("saccades/predicted/right/labels")
+@produces("saccades/template_matching/{side}/labels")
+@produces("saccades/template_matching/{side}/epochs")
 
-@produces("saccades/predicted/left/epochs")
-@produces("saccades/predicted/right/epochs")
+@param("fieldnames")
+
+# @produces("saccades/predicted/left/labels")
+# @produces("saccades/predicted/right/labels")
+
+# @produces("saccades/predicted/left/epochs")
+# @produces("saccades/predicted/right/epochs")
 
 def run(data, params):
     window_size_samples = params["window_size_samples"]
@@ -41,7 +51,7 @@ def run(data, params):
     onset_offset_regressor = load_pickle(saccade_duration_regressor)
 
     res = {}
-    for side in ["left", "right"]:
+    for side in params["fieldnames"]["side"]:
         pupil_nt_pose = data[f"pose/smoothed/{side}"]
         candidate_saccade_indices = data[f"saccades/putative/{side}/indices"]
         

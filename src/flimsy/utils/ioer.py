@@ -92,7 +92,7 @@ def pretty_print(summary): ## TOOD -- should this be generalized or only for run
 def load_datasets(h5file, fieldnames):
     to_return = {}
     for name in fieldnames:
-        logger.debug(name)
+        logger.debug(f"loading: {name}")
         to_return[name] = read_obj(h5file[name])
     
     return to_return

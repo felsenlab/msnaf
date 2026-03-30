@@ -11,43 +11,51 @@ logger = logging.getLogger(__name__)
 @param("framerate", default=150)
 @param("framedrop_threshold", default=1.5)
 
-@requires("pose/uncorrected/left/nasal")
-@requires("pose/uncorrected/left/pupil")
-@requires("pose/uncorrected/left/temporal")
-@requires("pose/uncorrected/left/ventral")
-@requires("pose/uncorrected/left/dorsal")
-@requires("pose/uncorrected/right/nasal")
-@requires("pose/uncorrected/right/pupil")
-@requires("pose/uncorrected/right/temporal")
-@requires("pose/uncorrected/right/ventral")
-@requires("pose/uncorrected/right/dorsal")
+@requires("pose/uncorrected/{side}/{bodypart}")
+@requires("frames/{side}/intervals")
 
-@requires("frames/left/intervals")
-@requires("frames/right/intervals")
+@param("fieldnames")
 
-@produces("pose/masked/left/nasal")
-@produces("pose/masked/left/pupil")
-@produces("pose/masked/left/temporal")
-@produces("pose/masked/left/ventral")
-@produces("pose/masked/left/dorsal")
+@produces("pose/masked/{side}/{bodypart}")
+@produces("pose/interopolated/{side}/{bodypart}")
 
-@produces("pose/interpolated/left/nasal")
-@produces("pose/interpolated/left/pupil")
-@produces("pose/interpolated/left/temporal")
-@produces("pose/interpolated/left/ventral")
-@produces("pose/interpolated/left/dorsal")
+# @requires("pose/uncorrected/left/nasal")
+# @requires("pose/uncorrected/left/pupil")
+# @requires("pose/uncorrected/left/temporal")
+# @requires("pose/uncorrected/left/ventral")
+# @requires("pose/uncorrected/left/dorsal")
+# @requires("pose/uncorrected/right/nasal")
+# @requires("pose/uncorrected/right/pupil")
+# @requires("pose/uncorrected/right/temporal")
+# @requires("pose/uncorrected/right/ventral")
+# @requires("pose/uncorrected/right/dorsal")
 
-@produces("pose/masked/right/nasal")
-@produces("pose/masked/right/pupil")
-@produces("pose/masked/right/temporal")
-@produces("pose/masked/right/ventral")
-@produces("pose/masked/right/dorsal")
+# @requires("frames/left/intervals")
+# @requires("frames/right/intervals")
 
-@produces("pose/interpolated/right/nasal")
-@produces("pose/interpolated/right/pupil")
-@produces("pose/interpolated/right/temporal")
-@produces("pose/interpolated/right/ventral")
-@produces("pose/interpolated/right/dorsal")
+# @produces("pose/masked/left/nasal")
+# @produces("pose/masked/left/pupil")
+# @produces("pose/masked/left/temporal")
+# @produces("pose/masked/left/ventral")
+# @produces("pose/masked/left/dorsal")
+
+# @produces("pose/interpolated/left/nasal")
+# @produces("pose/interpolated/left/pupil")
+# @produces("pose/interpolated/left/temporal")
+# @produces("pose/interpolated/left/ventral")
+# @produces("pose/interpolated/left/dorsal")
+
+# @produces("pose/masked/right/nasal")
+# @produces("pose/masked/right/pupil")
+# @produces("pose/masked/right/temporal")
+# @produces("pose/masked/right/ventral")
+# @produces("pose/masked/right/dorsal")
+
+# @produces("pose/interpolated/right/nasal")
+# @produces("pose/interpolated/right/pupil")
+# @produces("pose/interpolated/right/temporal")
+# @produces("pose/interpolated/right/ventral")
+# @produces("pose/interpolated/right/dorsal")
 
 def run(data, params):
     confidence_threshold = params["confidence_threshold"]
@@ -55,7 +63,7 @@ def run(data, params):
     framedrop_threshold = params["framedrop_threshold"]
 
     res = {}
-    for side in ["left", "right"]:
+    for side in params["fieldnames"]["side"]:
         pupil_pose = data[f"pose/uncorrected/{side}/pupil"]
         nasal_pose = data[f"pose/uncorrected/{side}/nasal"]
         temporal_pose = data[f"pose/uncorrected/{side}/temporal"]

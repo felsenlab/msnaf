@@ -42,7 +42,8 @@ def interpolate_gaps(pose):
         indices = np.arange(0, n_samples)
         ## NOTE: x is target indices to interp, xp and fp are real data to interp from
         
-        #logger.info(f"to_interp: {indices_to_interp}")
+        logger.info(f"to_interp: {indices_to_interp}")
+        logger.info(f"values: {values[:50]}")
         if len(indices_to_interp) > 0:
             mask = np.ones(values.size, dtype=bool)
             mask[indices_to_interp] = 0
