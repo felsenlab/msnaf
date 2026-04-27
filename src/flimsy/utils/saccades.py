@@ -50,7 +50,7 @@ def interpolate_gaps(pose):
             
             interpolated_values = np.interp(x=indices_to_interp, xp=indices[mask], fp=values[mask]) 
             logger.warning(f"Found {indices_to_interp.size} masked indices to interpolate (column: {column_index})")
-            logger.debug(f"nans in fp: {np.isnan(values[~indices_to_interp]).sum()}")
+            logger.debug(f"nans in fp: {np.isnan(values[mask]).sum()}")
             interpolated[indices_to_interp, column_index] = interpolated_values
     logger.warning(np.isnan(interpolated).sum())
     return interpolated

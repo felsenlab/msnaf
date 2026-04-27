@@ -3,24 +3,28 @@ initH5:
 loadLabJackDataRig1.0: 
   file_pattern: "data_*.dat"
   channel_map:
-    Time: "timestamps"
-    v0: "v0"
-    v1: "v1"
-    v2: "v2"
-    v3: "v3"
-    v4: "v4"
-    v5: "v5"
-    v6: "camera"
-    y0: "y0"
-    y1: "y1"
-    y2: "y2"
-    y3: "y3"
-    y4: "y4"
-    y5: "y5"
-    y6: "stimulus"
+    #Time: "timestamps"
+    y0: "barcode"
+    y1: "stimulus"
+    y2: "camera"
+    # Time: "timestamps"
+    # v0: "v0"
+    # v1: "v1"
+    # v2: "v2"
+    # v3: "v3"
+    # v4: "v4"
+    # v5: "v5"
+    # v6: "camera"
+    # y0: "y0"
+    # y1: "y1"
+    # y2: "y2"
+    # y3: "y3"
+    # y4: "y4"
+    # y5: "y5"
+    # y6: "stimulus"
   output_filename: 'consolidated_labjack.csv'
   fieldnames:
-    channel: ["timestamps", "v0", "v1", "v2", "v3", "v4", "v5", "camera", "y0", "y1", "y2", "y3", "y4", "y5", "stimulus"]
+    channel: ["camera","stimulus", "barcode"]
 timestampCameraFrames:
   sampling_rate: 2000
   interval_pattern: "*Cam_timestamps.txt"
@@ -47,7 +51,7 @@ loadPoseEstimates:
 interpolateMissingPose:
   framerate: 150
   framedrop_threshold: 1.5
-  confidence_threshold: 0.999
+  confidence_threshold: 0.99
   fieldnames:
     side: ['right']
     bodypart: ['nasal', 'temporal', 'dorsal', 'ventral', 'pupil']

@@ -34,6 +34,7 @@ def run(data, params):
         logger.info(f"Consolidated LabJack data written to {output_path}")
 
     res = {}
+    res["labjack/timestamps"] = labjack_data["Time"].to_numpy()
     for channel_name, column_name in channel_map.items():
         if channel_name in labjack_data.columns:
             res[f"labjack/{column_name}/raw"] = labjack_data[channel_name].to_numpy()

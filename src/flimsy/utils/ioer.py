@@ -152,3 +152,55 @@ def write_obj(h5file, key, value):
 
     else:
         logger.error(f"Unsupported type: {type(value)}")
+
+import re
+import io
+import pandas as pd
+ 
+def parse_experiment_file(filepath: str) -> tuple[dict, pd.DataFrame]:
+    """
+    Parse a experiment .txt file with a metadata header and tabular data.
+ 
+    The file format is:
+      - Lines 1–4: key-value metadata (e.g. "Spatial frequency: 0.15 (cycles/degree)")
+      - Line 5:    column names prefixed with "Columns: ", may contain unprotected commas
+                   inside parenthetical descriptions
+      - Line 6+:   numeric CSV data
+ 
+    Returns
+    -------
+    metadata : dict
+        Keys are the parameter names (str), values are the raw value strings (str).
+    df : pd.DataFrame
+        Tabular data with cleaned column names.
+    """
+    with open(filepath, "r") as f:
+        lines = f.readlines()
+ 
+    # ── 1. Metadata (first 4 lines) ──────────────────────────────────────────
+    metadata = {}
+    METADATA_LINES = 4
+    for line in lines[:METADATA_LINES]:
+        # Split only on the first colon so values like "0.4 (0, 1)" stay intact
+        key, _, value = line.partition(":")
+        metadata[key.strip()] = value.strip()
+ 
+    # ── 2. Column names (line 5) ─────────────────────────────────────────────
+    # Strip the "Columns: " prefix, then split on commas that are NOT inside
+    # parentheses — this preserves descriptions like "Event (1=Grating, 2=Motion)"
+    columns_line = lines[METADATA_LINES].strip()
+    columns_line = re.sub(r"^Columns:\s*", "", columns_line, flags=re.IGNORECASE)
+ 
+    # Split on commas that have no open parenthesis to their left (within the token)
+    column_names = [c.strip() for c in re.split(r",(?![^(]*\))", columns_line)]
+ 
+    # ── 3. Tabular data (remaining lines) ────────────────────────────────────
+    data_block = "".join(lines[METADATA_LINES + 1 :])
+    df = pd.read_csv(
+        io.StringIO(data_block),
+        header=None,
+        names=column_names,
+        skipinitialspace=True,
+    )
+ 
+    return metadata, df

@@ -48,7 +48,7 @@ def _find_data_start(filepath: Path, sep: str, encoding: str) -> tuple[int, bool
     tabular data, and whether a header row is present.
 
     Only the first file in the folder needs to be scanned — all files
-    produced in the same acquisition pass share the same metadata structure.
+    produced in the same pass share the same metadata structure.
 
     Returns (skip_rows, has_header).
     """
@@ -94,8 +94,8 @@ def consolidate_dat_files(
         File encoding (default ``"utf8"``). Must be a Polars-compatible
         encoding name; use ``"utf8"`` rather than ``"utf-8"``.
     output_path:
-        If given, the consolidated DataFrame is written to this path as a
-        TSV file.  Defaults to ``None`` (no file written).
+        If given, the consolidated DataFrame is also written to this path as
+        a TSV file.
     sort_key:
         Custom sort key callable.  Defaults to natural (human) sort order so
         that ``data_2`` comes before ``data_10``.
@@ -120,7 +120,7 @@ def consolidate_dat_files(
         raise FileNotFoundError(f"Directory not found: {directory}")
 
     t0 = time.perf_counter()
-    files = sorted(find_files_matching_pattern(directory, recursive=True, pattern=pattern)) #sorted(directory.glob(pattern), key=sort_key or _natural_sort_key)
+    files = sorted(find_files_matching_pattern(directory, pattern, recursive=True), key=sort_key or _natural_sort_key) #sorted(directory.glob(pattern), key=sort_key or _natural_sort_key)
     if not files:
         raise FileNotFoundError(
             f"No files matching '{pattern}' found in {directory}"
@@ -135,9 +135,13 @@ def consolidate_dat_files(
         print(f"[timing] metadata scan    : {time.perf_counter() - t1:.3f}s  (skip_rows={skip_rows}, has_header={has_header})")
 
     # --- Read and concat all files natively in parallel ------------------
-    # scan_csv accepts a list of paths and reads them in parallel via
-    # Polars' lazy engine.  include_file_paths adds the source filename
-    # column at no extra cost.  collect() triggers execution.
+    # scan_csv accepts a glob string and reads all matching files in parallel
+    # via Polars' lazy engine. include_file_paths adds the source filename
+    # column at no extra cost. collect() triggers execution.
+    #
+    # We build a glob from the sorted file list by passing the first file's
+    # parent and the original pattern — this preserves our natural sort order
+    # assumption while still using the fast scan path.
     t2 = time.perf_counter()
     result = (
         pl.scan_csv(

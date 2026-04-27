@@ -80,22 +80,32 @@ def run(data, params):
 
         dropped_frames, frames_to_insert = identify_dropped_frames(frame_intervals, len(masked_pupil_pose), framerate, framedrop_threshold)
         
-        logger.debug(f"{side} Pupil")
+        logger.debug(f"Inserting frames: {side} Pupil")
         indexcorrected_pupil_pose = insert_frames(masked_pupil_pose, frames_to_insert)
-        logger.debug(f"{side} Nasal")
+        logger.debug(f"Inserting frames: {side} Nasal")
         indexcorrected_nasal_pose = insert_frames(masked_nasal_pose, frames_to_insert)
-        logger.debug(f"{side} Temporal")
+        logger.debug(f"Inserting frames: {side} Temporal")
         indexcorrected_temporal_pose = insert_frames(masked_temporal_pose, frames_to_insert)
-        logger.debug(f"{side} Dorsal")
+        logger.debug(f"Inserting frames: {side} Dorsal")
         indexcorrected_dorsal_pose = insert_frames(masked_dorsal_pose, frames_to_insert)
-        logger.debug(f"{side} Ventral")
+        logger.debug(f"Inserting frames: {side} Ventral")
         indexcorrected_ventral_pose = insert_frames(masked_ventral_pose, frames_to_insert)
         
+        logger.debug(f"Interpolating gaps: {side} Pupil")
         imputed_pose_pupil = interpolate_gaps(indexcorrected_pupil_pose)
+
+        logger.debug(f"Interpolating gaps: {side} Nasal")
         imputed_pose_nasal = interpolate_gaps(indexcorrected_nasal_pose)
+
+        logger.debug(f"Interpolating gaps: {side} Temporal")
         imputed_pose_temporal = interpolate_gaps(indexcorrected_temporal_pose)
+
+        logger.debug(f"Interpolating gaps: {side} Dorsal")
         imputed_pose_dorsal = interpolate_gaps(indexcorrected_dorsal_pose)
+
+        logger.debug(f"Interpolating gaps: {side} Ventral")
         imputed_pose_ventral = interpolate_gaps(indexcorrected_ventral_pose)
+
 
         res[f"pose/masked/{side}/pupil"] = indexcorrected_pupil_pose[:,[0,1]]
         res[f"pose/masked/{side}/pupil"] = indexcorrected_nasal_pose[:,[0,1]]

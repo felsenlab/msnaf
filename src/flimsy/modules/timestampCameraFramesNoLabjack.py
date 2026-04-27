@@ -59,7 +59,7 @@ from flimsy.utils.ioer import find_files_matching_pattern
 # @produces("frames/right/intervals", description="")
 @param("sampling_rate", description="labjack sampling rate")
 @param("interval_pattern")
-@param("start_offset", default=4.37, description="4.37 seconds is the MEAN time between clicking "start" and the first stimulus appearing on screen")
+@param("start_offset", default=4.37, description="4.37 seconds is the MEAN time between clicking 'start' and the first stimulus appearing on screen")
 @param("fieldnames")
 def run(data, params):
 
