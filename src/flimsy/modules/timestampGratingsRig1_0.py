@@ -59,6 +59,10 @@ def run(data, params):
 
 
     #event_time_in_lj = frametimestamps[event_index_in_camera_frames]
+    nanmask = np.isnan(times)
+    if nanmask.sum() > 0:
+        logger.warning("Some times are nan ({nanmask})")
+    stimulus_metadata.loc[nanmask] = np.nan
     event_ids = stimulus_metadata["Event (1=Grating, 2=Motion, 3=Probe, 4=ITI)"].to_numpy()
     event_orientation = stimulus_metadata["Motion direction"].to_numpy()
     probe_contrast = stimulus_metadata["Probe contrast"].to_numpy()
