@@ -5,6 +5,8 @@ channels:
   - https://repo.anaconda.com/pkgs/main
   - https://repo.anaconda.com/pkgs/r
 dependencies:
+  - pymannkendall
+  - statsmodels
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=2_gnu
   - _python_abi3_support=1.0=hd8ed1ab_2

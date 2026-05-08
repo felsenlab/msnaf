@@ -48,7 +48,7 @@ def run(data, params):
     
     reference = stimulus_metadata['Timestamp'].to_numpy(dtype=np.float64)
     reference = reference - reference[0]
-    filtered, mask = filter_dropout(photologic_signal)
+    filtered, mask = filter_dropout(photologic_signal, )
     inds_rise = np.where(np.diff(filtered.astype(int)) == 1)[0] + 1
     inds_fall = np.where(np.diff(filtered.astype(int)) == -1)[0] + 1
 
